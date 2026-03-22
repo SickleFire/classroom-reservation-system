@@ -4,10 +4,105 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register Class</title>
+
+   <style>
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        min-height: 100vh;
+        font-family: 'Montserrat', sans-serif;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        color: #ffffff;
+        position: relative;
+        padding: 20px;
+        background: url("classroom.jpg") center / cover no-repeat;
+    }
+
+    body::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: #000000d0;
+        z-index: 0;
+    }
+
+    body > * {
+        position: relative;
+        z-index: 1;
+    }
+
+    h2 {
+        margin-bottom: 20px;
+    }
+
+    label {
+        width: 100%;
+        max-width: 400px;
+        margin-bottom: 5px;
+        font-weight: bold;
+    }
+
+    input,
+    select,
+    button {
+        width: 100%;
+        max-width: 400px;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: none;
+        border-radius: 6px;
+        font-size: 16px;
+    }
+
+    input,
+    select {
+        background: #ffffff;
+        color: #000000;
+    }
+
+    .bckbtn {
+        align-self: flex-start;
+        width: 100px;
+    }
+
+    button {
+        background-color: #2b43b7;
+        color: #fffbfb;
+        cursor: pointer;
+        font-weight: bold;
+        width: 100px;
+    }
+
+    button:hover {
+        background-color: #4072be;
+    }
+
+    #roomDetails,
+    #summary,
+    #message {
+        width: 100%;
+        max-width: 400px;
+        margin-bottom: 15px;
+        text-align: left;
+    }
+
+    #message {
+        font-weight: bold;
+    }
+</style>
+
 </head>
 <body>
 
-    <button onclick="window.location.href='dashboard.html'">← Back</button>
+    <button class="bckbtn" onclick="window.location.href='dashboard.html'">← Back</button>
 
     <h2>Register a Class Session</h2>
 
