@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User List</title>
+    <style>
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+        th { background-color: #f4f4f4; }
+        .pagination { margin-top: 16px; display: flex; align-items: center; gap: 6px; }
+        .pagination button { padding: 6px 10px; cursor: pointer; }
+        .pagination button.active { font-weight: bold; background: #333; color: #fff; }
+        .pagination button:disabled { opacity: 0.4; cursor: default; }
+        .role-student { color: #1a7f37; font-weight: bold; }
+        .role-teacher { color: #0969da; font-weight: bold; }
+        .role-admin   { color: #d1242f; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <button onclick="window.location.href='dashboard.html'">← Back</button>
+
+    <h2>User List</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>User ID</th>
+                <th>Full Name</th>
+                <th>Email</th>
+                <th>Student ID</th>
+                <th>Role</th>
+                <th>Account Created</th>
+            </tr>
+        </thead>
+        <tbody id="userTableBody">
+            <tr><td colspan="6">Loading users...</td></tr>
+        </tbody>
+    </table>
+
+    <!-- Pagination -->
+    <div class="pagination" id="pagination"></div>
+
+    <p id="message"></p>
+
+    <script>
+        let allUsers    = [];
+        let currentPage = 1;
+        const perPage   = 20;
+
+        async function loadUsers() {
+            try {
+                const res   = await fetch('/admin/users');
+                allUsers    = await res.json();
+                currentPage = 1;
+                renderTable();
+                renderPagination();
+            } catch (err) {
+                document.getElementById('message').textContent = 'Failed to load users.';
+                console.error('Load users error:', err);
+            }
+        }
+
+        function renderTable() {
+            const tbody  = document.getElementById('userTableBody');
+            const start  = (currentPage - 1) * perPage;
+            const end    = start + perPage;
+            const subset = allUsers.slice(start, end);
+
+            if (subset.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6">No users found.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = '';
+            subset.forEach(u => {
+                let roleClass = 'role-admin';
+                let roleLabel = 'Admin';
+
+                if (u.studentID) {
+                    roleClass = 'role-student';
+                    roleLabel = 'Student';
+                } else if (u.teacherID) {
+                    roleClass = 'role-teacher';
+                    roleLabel = 'Teacher';
+                }
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${u.userID}</td>
+                        <td>${u.fullname || '-'}</td>
+                        <td>${u.email}</td>
+                        <td>${u.studentID || '-'}</td>
+                        <td class="${roleClass}">${roleLabel}</td>
+                        <td>${new Date(u.account_created).toLocaleString()}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function renderPagination() {
+            const totalPages = Math.ceil(allUsers.length / perPage);
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML  = '';
+
+            // Previous arrow
+            const prevBtn       = document.createElement('button');
+            prevBtn.textContent = '‹';
+            prevBtn.disabled    = currentPage === 1;
+            prevBtn.onclick     = () => goToPage(currentPage - 1);
+            pagination.appendChild(prevBtn);
+
+            // Page number buttons
+            for (let i = 1; i <= totalPages; i++) {
+                const btn       = document.createElement('button');
+                btn.textContent = i;
+                if (i === currentPage) btn.classList.add('active');
+                btn.onclick = () => goToPage(i);
+                pagination.appendChild(btn);
+            }
+
+            // Next arrow
+            const nextBtn       = document.createElement('button');
+            nextBtn.textContent = '›';
+            nextBtn.disabled    = currentPage === totalPages;
+            nextBtn.onclick     = () => goToPage(currentPage + 1);
+            pagination.appendChild(nextBtn);
+        }
+
+        function goToPage(page) {
+            const totalPages = Math.ceil(allUsers.length / perPage);
+            if (page < 1 || page > totalPages) return;
+            currentPage = page;
+            renderTable();
+            renderPagination();
+        }
+
+        window.onload = loadUsers;
+    </script>
+
+</body>
+</html>
