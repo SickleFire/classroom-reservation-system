@@ -50,23 +50,6 @@ async function initDB() {
     }
 }
 
-// ─── RESERVE ─────────────────────────────────────────────────────────────────
-
-app.post('/reserve', async (req, res) => {
-    const { room, time } = req.body;
-    console.log(`Parsed reservation: room=${room} time=${time}`);
-    try {
-        await mysql.query(
-            'INSERT INTO reservations (room_name, time) VALUES (?, ?)',
-            [room, time]
-        );
-        res.send(`<h1>Reservation received for room ${room} at ${time}</h1>`);
-    } catch (err) {
-        console.error('Insert error:', err);
-        res.status(500).send('<h1>Something went wrong.</h1>');
-    }
-});
-
 // ─── LOGIN (handles Student, Teacher, Admin automatically) ───────────────────
 
 app.post('/login', async (req, res) => {
