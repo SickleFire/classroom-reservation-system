@@ -2,19 +2,9 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Run Rust conflict checker service",
+      "label": "Run Rust conflict checker binary",
       "type": "shell",
-      "command": "cargo",
-      "args": [
-        "run"
-      ],
-      "options": {
-        "cwd": "${workspaceFolder}/Rust-Services/conflict-checker" 
-      },
-      "group": {
-        "kind": "build",
-        "isDefault": false
-      },
+      "command": "${workspaceFolder}/bin/conflict-checker.exe",
       "presentation": {
         "echo": true,
         "reveal": "always",
@@ -22,6 +12,7 @@
         "panel": "shared"
       },
       "problemMatcher": []
+
     },
     {
       "label": "Run Backend Main.js",
@@ -44,7 +35,7 @@
     },
     {
       "label": "Run Node + Rust",
-      "dependsOn": ["Run Backend Main.js", "Run Rust conflict checker service"],
+      "dependsOn": ["Run Backend Main.js", "Run Rust conflict checker binary"],
       "dependsOrder": "parallel", 
       "group": {
         "kind": "build",
