@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard - Classroom Reservation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #f4f6f9;
+        }
+        header {
+            background-color: #4a90e2;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+        }
+        nav {
+            background-color: #333;
+            padding: 0.5rem;
+        }
+        nav a {
+            color: white;
+            margin: 0 1rem;
+            text-decoration: none;
+        }
+        nav a:hover {
+            text-decoration: underline;
+        }
+        .container {
+            display: flex;
+            margin: 1rem;
+        }
+        .sidebar {
+            width: 200px;
+            background: #fff;
+            border-right: 1px solid #ddd;
+            padding: 1rem;
+        }
+        .sidebar h3 {
+            margin-top: 0;
+        }
+        .content {
+            flex: 1;
+            padding: 1rem;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .card {
+            background: #f9f9f9;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+        }
+        .card h4 {
+            margin-top: 0;
+        }
+        footer {
+            text-align: center;
+            padding: 1rem;
+            background: #eee;
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Admin Dashboard</h1>
+        <p>Welcome, Admin!</p>
+    </header>
+
+    <nav>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="reservations.html">Reservations</a>
+        <a href="users.html">Users</a>
+        <a href="settings.html">Settings</a>
+        <a href="logout.html">Logout</a>
+    </nav>
+
+    <div class="container">
+        <aside class="sidebar">
+            <h3>Quick Links</h3>
+            <ul>
+                <li><a href="add-reservation.html">Add Reservation</a></li>
+                <li><a href="manage-rooms.html">Manage Rooms</a></li>
+                <li><a href="reports.html">Reports</a></li>
+            </ul>
+        </aside>
+
+        <main class="content">
+            <div class="card">
+                <h4>System Stats</h4>
+                <p>Total Reservations: 120</p>
+                <p>Active Users: 45</p>
+                <p>Available Rooms: 10</p>
+            </div>
+
+            <div class="card">
+                <h4>Recent Reservations</h4>
+                <ul>
+                    <li>Room 101 reserved by John (2026-03-22 10:00)</li>
+                    <li>Room 202 reserved by Sarah (2026-03-22 14:00)</li>
+                    <li>Room 303 reserved by Alex (2026-03-23 09:00)</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h4>Admin Actions</h4>
+                <button onclick="alert('Add new room')">Add Room</button>
+                <button onclick="alert('Generate report')">Generate Report</button>
+            </div>
+        </main>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Classroom Reservation System</p>
+    </footer>
+</body>
+</html>

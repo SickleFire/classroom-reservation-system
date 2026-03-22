@@ -54,6 +54,39 @@ app.post('/reserve', async (req, res) => {
         res.status(500).send('<h1>Something went wrong.</h1>');
     }
 });
+
+app.post('/login', async (req, res) => {
+    const { username, password} = req.body;
+    console.log(`Parsed Information: email=${username} password=${password}`);
+    if (username === 'admin' && password === 'lumecraft') {
+        res.redirect('dashboard.html');
+    }else if (false) {
+        //User Authentication MySQL
+    } 
+    else {
+        res.status(401).send('Invalid credentials');
+    }
+})
+
+app.post('/register', async(req, res) =>{
+    const {fullname, email, password, confirmpassword} = req.body;
+    console.log(`/Parsed Information: fullname=${fullname} email=${email} password=${password} confirm-password=${confirmpassword}`);
+    if (password !== confirmpassword) {
+        return res.status(400).send('Passwords do not match');
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    try {
+        await pool.query(
+            'INSERT INTO users (fullname, email, password) VALUES (?, ?, ?)',
+            [fullname, email, hashedPassword]
+        );
+        res.send('Registration successful! You can now log in.');
+    } catch (err) {
+        res.status(500).send('Error registering user: ' + err.message);
+    }
+})
  
 // 404 handler
 app.use((req, res) => {
