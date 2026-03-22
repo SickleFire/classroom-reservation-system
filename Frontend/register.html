@@ -88,7 +88,6 @@
         }
         .message.error   { color: #dc3545; }
         .message.success { color: #28a745; }
-        #phoneField { display: none; }
     </style>
 </head>
 <body>
@@ -106,10 +105,8 @@
         <label for="lastname">Last Name</label>
         <input type="text" id="lastname" placeholder="Dela Cruz" required>
 
-        <div id="phoneField">
-            <label for="phone">Phone Number</label>
-            <input type="text" id="phone" placeholder="09171234567">
-        </div>
+        <label for="phone">Phone Number</label>
+        <input type="text" id="phone" placeholder="09171234567" required>
 
         <label for="email">Email</label>
         <input type="email" id="email" placeholder="Enter your email" required>
@@ -136,20 +133,17 @@
             const btnStudent  = document.getElementById('btnStudent');
             const btnTeacher  = document.getElementById('btnTeacher');
             const registerBtn = document.getElementById('registerBtn');
-            const phoneField  = document.getElementById('phoneField');
 
             if (role === 'student') {
-                btnStudent.className     = 'active-student';
-                btnTeacher.className     = '';
-                registerBtn.className    = 'btn-student';
-                registerBtn.textContent  = 'Register as Student';
-                phoneField.style.display = 'none';
+                btnStudent.className    = 'active-student';
+                btnTeacher.className    = '';
+                registerBtn.className   = 'btn-student';
+                registerBtn.textContent = 'Register as Student';
             } else {
-                btnStudent.className     = '';
-                btnTeacher.className     = 'active-teacher';
-                registerBtn.className    = 'btn-teacher';
-                registerBtn.textContent  = 'Register as Teacher';
-                phoneField.style.display = 'block';
+                btnStudent.className    = '';
+                btnTeacher.className    = 'active-teacher';
+                registerBtn.className   = 'btn-teacher';
+                registerBtn.textContent = 'Register as Teacher';
             }
 
             document.getElementById('message').textContent = '';
@@ -164,15 +158,9 @@
             const confirm_password = document.getElementById('confirm_password').value;
             const msgEl            = document.getElementById('message');
 
-            if (!firstname || !lastname || !email || !password || !confirm_password) {
+            if (!firstname || !lastname || !phone || !email || !password || !confirm_password) {
                 msgEl.className   = 'message error';
                 msgEl.textContent = 'Please fill in all fields.';
-                return;
-            }
-
-            if (currentRole === 'teacher' && !phone) {
-                msgEl.className   = 'message error';
-                msgEl.textContent = 'Phone number is required for teachers.';
                 return;
             }
 
@@ -196,7 +184,7 @@
                 const result = await res.json();
 
                 if (res.ok) {
-                    msgEl.className = 'message success';
+                    msgEl.className   = 'message success';
                     msgEl.textContent = currentRole === 'student'
                         ? `Registered! Your Student ID is: ${result.studentID}`
                         : `Registered! Your Teacher ID is: ${result.teacherID}`;
