@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register Class</title>
-
-   <style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Register Class</title>
+<style>
     * {
         margin: 0;
         padding: 0;
@@ -22,20 +21,53 @@
         color: #FFFFFF;
         position: relative;
         padding: 20px;
-        background: url("classroom.jpg") center / cover no-repeat;
+        background: url("croom.jpg") center / cover no-repeat;
     }
 
     body::before {
         content: "";
         position: absolute;
         inset: 0;
-        background: #000000D0;
+        background: #171717d0;
         z-index: 0;
     }
 
     body > * {
         position: relative;
         z-index: 1;
+    }
+
+    .bckbtn {
+        align-self: flex-start;
+        width: 100px;
+        padding: 10px 16px;
+        margin-bottom: 20px;
+        border: none;
+        border-radius: 6px;
+        font-size: 16px;
+        background-color: #000000;
+        color: #FFFFFF;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    .bckbtn:hover {
+        background-color: #FFFFFF;
+        color: #000000;
+    }
+
+    .container {
+        width: 100%;
+        max-width: 450px;
+        padding: 25px;
+        background: #ffffff1a; 
+        border-radius: 12px;
+        box-shadow: 0 6px 15px #00000080;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
     }
 
     h2 {
@@ -47,6 +79,7 @@
         max-width: 400px;
         margin-bottom: 5px;
         font-weight: bold;
+        color: #FFFFFF;
     }
 
     input,
@@ -58,7 +91,7 @@
         border: none;
         border-radius: 6px;
         font-size: 16px;
-        background: #FFFFFF;
+        background-color: #FFFFFF;
         color: #000000;
     }
 
@@ -72,16 +105,12 @@
         color: #FFFFFF;
         cursor: pointer;
         font-weight: bold;
+        width: 40%;
     }
 
     button:hover {
-        background-color: #FFFBF0;
+        background-color: #FFFFFF;
         color: #000000;
-    }
-
-    .bckbtn {
-        align-self: flex-start;
-        width: 100px;
     }
 
     #roomDetails,
@@ -95,7 +124,7 @@
 
     #summary {
         display: none;
-        background: #FFFFFF1F;
+        background-color: #FFFFFF1F;
         border: 1px solid #FFFFFF33;
         border-radius: 10px;
         padding: 15px;
@@ -105,254 +134,250 @@
 
     #roomDetails {
         display: none;
-        background: #FFFFFF14;
+        background-color: #FFFFFF14;
         border-radius: 10px;
         padding: 15px;
     }
 
     #message {
         font-weight: bold;
+        color: #FF0000;
     }
 </style>
-
 </head>
 <body>
 
     <button class="bckbtn" onclick="window.location.href='dashboard.html'">← Back</button>
 
-    <h2>Register a Class Session</h2>
+    <div class="container">
+        <h2>Register a Class Session</h2>
 
-    <label>Student ID:</label><br>
-    <input type="text" id="studentID" placeholder="e.g. 2023001-S" required /><br><br>
+        <label>Student ID:</label>
+        <input type="text" id="studentID" placeholder="e.g. 2023001-S" required />
 
-    <label>Course:</label><br>
-    <select id="courseID" required>
-        <option value="">-- Select Course --</option>
-    </select><br><br>
+        <label>Course:</label>
+        <select id="courseID" required>
+            <option value="">-- Select Course --</option>
+        </select>
 
-    <label>Date:</label><br>
-    <input type="date" id="date" required /><br><br>
+        <label>Date:</label>
+        <input type="date" id="date" required />
 
-    <label>Start Time:</label><br>
-    <select id="starttime" onchange="updateEndTimes()" required>
-        <option value="">-- Select Start Time --</option>
-    </select><br><br>
+        <label>Start Time:</label>
+        <select id="starttime" onchange="updateEndTimes()" required>
+            <option value="">-- Select Start Time --</option>
+        </select>
 
-    <label>End Time:</label><br>
-    <select id="endtime" onchange="loadRooms()" required>
-        <option value="">-- Select Start Time first --</option>
-    </select><br><br>
+        <label>End Time:</label>
+        <select id="endtime" onchange="loadRooms()" required>
+            <option value="">-- Select Start Time first --</option>
+        </select>
 
-    <label>Available Room:</label><br>
-    <select id="classroomID" onchange="showRoomDetails()" required>
-        <option value="">-- Pick date and time first --</option>
-    </select><br><br>
+        <label>Available Room:</label>
+        <select id="classroomID" onchange="showRoomDetails()" required>
+            <option value="">-- Pick date and time first --</option>
+        </select>
 
-    <div id="roomDetails" style="display:none;">
-        <strong>Room Details:</strong><br>
-        <span id="roomName"></span><br>
-        <span id="roomID"></span><br>
-        <span id="roomCategory"></span><br>
-    </div><br>
+        <div id="roomDetails">
+            <strong>Room Details:</strong><br>
+            <span id="roomName"></span><br>
+            <span id="roomID"></span><br>
+            <span id="roomCategory"></span><br>
+        </div>
 
-    <div id="summary" style="display:none;">
-        <strong>Summary:</strong><br>
-        <span id="summaryText"></span><br><br>
+        <div id="summary">
+            <strong>Summary:</strong><br>
+            <span id="summaryText"></span>
+        </div>
+
+        <button onclick="submitClass()">Submit</button>
+        <button onclick="resetForm()">Clear</button>
+
+        <p id="message"></p>
     </div>
 
-    <button onclick="submitClass()">Submit</button>
-    <button onclick="resetForm()">Clear</button>
+<script>
+    let availableRooms = [];
+    let startDatetime = '';
+    let endDatetime = '';
 
-    <p id="message"></p>
+    const allSlots = [];
+    for (let hour = 7; hour <= 22; hour++) {
+        const minutes = hour === 22 ? [0] : [0, 30];
+        minutes.forEach(min => allSlots.push({ hour, min }));
+    }
 
-    <script>
-        let availableRooms = [];
-        let startDatetime  = '';
-        let endDatetime    = '';
+    function toAMPM(hour, min) {
+        const period = hour >= 12 ? 'PM' : 'AM';
+        const h = hour % 12 === 0 ? 12 : hour % 12;
+        return `${String(h).padStart(2,'0')}:${String(min).padStart(2,'0')} ${period}`;
+    }
 
-        const allSlots = [];
-        for (let hour = 7; hour <= 22; hour++) {
-            const minutes = hour === 22 ? [0] : [0, 30];
-            minutes.forEach(min => allSlots.push({ hour, min }));
-        }
+    function toMinutes(hour, min) {
+        return hour * 60 + min;
+    }
 
-        function toAMPM(hour, min) {
-            const period = hour >= 12 ? 'PM' : 'AM';
-            const h      = hour % 12 === 0 ? 12 : hour % 12;
-            return `${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')} ${period}`;
-        }
-
-        function toMinutes(hour, min) {
-            return hour * 60 + min;
-        }
-
-        function generateStartTimes() {
-            const startSelect = document.getElementById('starttime');
-            allSlots.forEach(slot => {
-                if (toMinutes(slot.hour, slot.min) <= toMinutes(19, 0)) {
-                    const hh        = String(slot.hour).padStart(2, '0');
-                    const mm        = String(slot.min).padStart(2, '0');
-                    const opt       = document.createElement('option');
-                    opt.value       = `${hh}:${mm}`;
-                    opt.textContent = toAMPM(slot.hour, slot.min);
-                    opt.dataset.hour = slot.hour;
-                    opt.dataset.min  = slot.min;
-                    startSelect.appendChild(opt);
-                }
-            });
-        }
-
-        function updateEndTimes() {
-            const startSelect = document.getElementById('starttime');
-            const endSelect   = document.getElementById('endtime');
-            const selectedOpt = startSelect.selectedOptions[0];
-
-            endSelect.innerHTML = '<option value="">-- Select End Time --</option>';
-            document.getElementById('classroomID').innerHTML = '<option value="">-- Pick date and time first --</option>';
-            document.getElementById('roomDetails').style.display = 'none';
-            document.getElementById('summary').style.display     = 'none';
-
-            if (!selectedOpt || !selectedOpt.value) return;
-
-            const startHour = parseInt(selectedOpt.dataset.hour);
-            const startMin  = parseInt(selectedOpt.dataset.min);
-            const startMins = toMinutes(startHour, startMin);
-            const maxMins   = startMins + (3 * 60);
-
-            allSlots.forEach(slot => {
-                const slotMins = toMinutes(slot.hour, slot.min);
-                if (slotMins > startMins && slotMins <= maxMins && slotMins <= toMinutes(22, 0)) {
-                    const hh        = String(slot.hour).padStart(2, '0');
-                    const mm        = String(slot.min).padStart(2, '0');
-                    const opt       = document.createElement('option');
-                    opt.value       = `${hh}:${mm}`;
-                    opt.textContent = toAMPM(slot.hour, slot.min);
-                    endSelect.appendChild(opt);
-                }
-            });
-        }
-
-        async function loadCourses() {
-            try {
-                const res      = await fetch('/schedule/courses');
-                const courses  = await res.json();
-                const dropdown = document.getElementById('courseID');
-                courses.forEach(c => {
-                    const option       = document.createElement('option');
-                    option.value       = c.courseID;
-                    option.textContent = `${c.name} - ${c.description}`;
-                    dropdown.appendChild(option);
-                });
-            } catch (err) {
-                console.error('Failed to load courses:', err);
+    function generateStartTimes() {
+        const startSelect = document.getElementById('starttime');
+        allSlots.forEach(slot => {
+            if (toMinutes(slot.hour, slot.min) <= toMinutes(19,0)) {
+                const hh = String(slot.hour).padStart(2,'0');
+                const mm = String(slot.min).padStart(2,'0');
+                const opt = document.createElement('option');
+                opt.value = `${hh}:${mm}`;
+                opt.textContent = toAMPM(slot.hour, slot.min);
+                opt.dataset.hour = slot.hour;
+                opt.dataset.min = slot.min;
+                startSelect.appendChild(opt);
             }
-        }
+        });
+    }
 
-        window.onload = () => {
-            generateStartTimes();
-            loadCourses();
-        };
+    function updateEndTimes() {
+        const startSelect = document.getElementById('starttime');
+        const endSelect = document.getElementById('endtime');
+        const selectedOpt = startSelect.selectedOptions[0];
+        endSelect.innerHTML = '<option value="">-- Select End Time --</option>';
+        document.getElementById('classroomID').innerHTML = '<option value="">-- Pick date and time first --</option>';
+        document.getElementById('roomDetails').style.display = 'none';
+        document.getElementById('summary').style.display = 'none';
 
-        function buildDatetime() {
-            const date  = document.getElementById('date').value;
-            const start = document.getElementById('starttime').value;
-            const end   = document.getElementById('endtime').value;
-            if (date && start) startDatetime = `${date} ${start}:00`;
-            if (date && end)   endDatetime   = `${date} ${end}:00`;
-        }
+        if (!selectedOpt || !selectedOpt.value) return;
 
-        async function loadRooms() {
-            buildDatetime();
-            if (!startDatetime || !endDatetime) return;
-            try {
-                const res      = await fetch(`/schedule/available-rooms?starttime=${startDatetime}&endtime=${endDatetime}`);
-                availableRooms = await res.json();
-                const dropdown = document.getElementById('classroomID');
-                dropdown.innerHTML = '<option value="">-- Select a Room --</option>';
-                if (availableRooms.length === 0) {
-                    dropdown.innerHTML = '<option value="">No rooms available for this time</option>';
-                    return;
-                }
-                availableRooms.forEach(r => {
-                    const option       = document.createElement('option');
-                    option.value       = r.classroomID;
-                    option.textContent = `${r.name} (${r.category})`;
-                    dropdown.appendChild(option);
-                });
-            } catch (err) {
-                console.error('Failed to load rooms:', err);
+        const startHour = parseInt(selectedOpt.dataset.hour);
+        const startMin = parseInt(selectedOpt.dataset.min);
+        const startMins = toMinutes(startHour, startMin);
+        const maxMins = startMins + 180; // 3 hours
+
+        allSlots.forEach(slot => {
+            const slotMins = toMinutes(slot.hour, slot.min);
+            if (slotMins > startMins && slotMins <= maxMins && slotMins <= toMinutes(22,0)) {
+                const hh = String(slot.hour).padStart(2,'0');
+                const mm = String(slot.min).padStart(2,'0');
+                const opt = document.createElement('option');
+                opt.value = `${hh}:${mm}`;
+                opt.textContent = toAMPM(slot.hour, slot.min);
+                endSelect.appendChild(opt);
             }
-        }
+        });
+    }
 
-        function showRoomDetails() {
-            const classroomID = document.getElementById('classroomID').value;
-            const room        = availableRooms.find(r => r.classroomID == classroomID);
-            if (!room) return;
+    async function loadCourses() {
+        try {
+            const res = await fetch('/schedule/courses');
+            const courses = await res.json();
+            const dropdown = document.getElementById('courseID');
+            courses.forEach(c => {
+                const option = document.createElement('option');
+                option.value = c.courseID;
+                option.textContent = `${c.name} - ${c.description}`;
+                dropdown.appendChild(option);
+            });
+        } catch (err) { console.error(err); }
+    }
 
-            document.getElementById('roomDetails').style.display = 'block';
-            document.getElementById('roomName').textContent      = `Room Name: ${room.name}`;
-            document.getElementById('roomID').textContent        = `Room ID: ${room.classroomID}`;
-            document.getElementById('roomCategory').textContent  = `Category: ${room.category}`;
+    window.onload = () => {
+        generateStartTimes();
+        loadCourses();
+    };
 
-            const courseName = document.getElementById('courseID').selectedOptions[0].text;
-            const studentID  = document.getElementById('studentID').value;
-            const startLabel = document.getElementById('starttime').selectedOptions[0].text;
-            const date       = document.getElementById('date').value;
-            const endLabel   = document.getElementById('endtime').selectedOptions[0].text;
+    function buildDatetime() {
+        const date = document.getElementById('date').value;
+        const start = document.getElementById('starttime').value;
+        const end = document.getElementById('endtime').value;
+        if (date && start) startDatetime = `${date} ${start}:00`;
+        if (date && end) endDatetime = `${date} ${end}:00`;
+    }
 
-            document.getElementById('summary').style.display = 'block';
-            document.getElementById('summaryText').innerHTML  = `
-                Student ID: ${studentID}<br>
-                Course: ${courseName}<br>
-                Date: ${date}<br>
-                Start: ${startLabel}<br>
-                End: ${endLabel}<br>
-                Room: ${room.name} (ID: ${room.classroomID})<br>
-                Category: ${room.category}
-            `;
-        }
-
-        async function submitClass() {
-            const studentID   = document.getElementById('studentID').value;
-            const courseID    = document.getElementById('courseID').value;
-            const classroomID = document.getElementById('classroomID').value;
-
-            if (!studentID || !courseID || !classroomID || !startDatetime || !endDatetime) {
-                document.getElementById('message').textContent = 'Please fill in all fields.';
+    async function loadRooms() {
+        buildDatetime();
+        if (!startDatetime || !endDatetime) return;
+        try {
+            const res = await fetch(`/schedule/available-rooms?starttime=${startDatetime}&endtime=${endDatetime}`);
+            availableRooms = await res.json();
+            const dropdown = document.getElementById('classroomID');
+            dropdown.innerHTML = '<option value="">-- Select a Room --</option>';
+            if (availableRooms.length === 0) {
+                dropdown.innerHTML = '<option value="">No rooms available for this time</option>';
                 return;
             }
+            availableRooms.forEach(r => {
+                const opt = document.createElement('option');
+                opt.value = r.classroomID;
+                opt.textContent = `${r.name} (${r.category})`;
+                dropdown.appendChild(opt);
+            });
+        } catch (err) { console.error(err); }
+    }
 
-            const data = { studentID, courseID, classroomID, starttime: startDatetime, endtime: endDatetime };
+    function showRoomDetails() {
+        const classroomID = document.getElementById('classroomID').value;
+        const room = availableRooms.find(r => r.classroomID == classroomID);
+        if (!room) return;
+        document.getElementById('roomDetails').style.display = 'block';
+        document.getElementById('roomName').textContent = `Room Name: ${room.name}`;
+        document.getElementById('roomID').textContent = `Room ID: ${room.classroomID}`;
+        document.getElementById('roomCategory').textContent = `Category: ${room.category}`;
 
-            try {
-                const res    = await fetch('/requests', {
-                    method:  'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body:    JSON.stringify(data)
-                });
-                const result = await res.json();
-                document.getElementById('message').textContent       = result.message;
-                document.getElementById('summary').style.display     = 'none';
-                document.getElementById('roomDetails').style.display = 'none';
-            } catch (err) {
-                document.getElementById('message').textContent = 'Submission failed. Please try again.';
-            }
+        const courseName = document.getElementById('courseID').selectedOptions[0].text;
+        const studentID = document.getElementById('studentID').value;
+        const startLabel = document.getElementById('starttime').selectedOptions[0].text;
+        const date = document.getElementById('date').value;
+        const endLabel = document.getElementById('endtime').selectedOptions[0].text;
+
+        document.getElementById('summary').style.display = 'block';
+        document.getElementById('summaryText').innerHTML = `
+            Student ID: ${studentID}<br>
+            Course: ${courseName}<br>
+            Date: ${date}<br>
+            Start: ${startLabel}<br>
+            End: ${endLabel}<br>
+            Room: ${room.name} (ID: ${room.classroomID})<br>
+            Category: ${room.category}
+        `;
+    }
+
+    async function submitClass() {
+        const studentID = document.getElementById('studentID').value;
+        const courseID = document.getElementById('courseID').value;
+        const classroomID = document.getElementById('classroomID').value;
+
+        if (!studentID || !courseID || !classroomID || !startDatetime || !endDatetime) {
+            document.getElementById('message').textContent = 'Please fill in all fields.';
+            return;
         }
 
-        function resetForm() {
-            document.getElementById('studentID').value   = '';
-            document.getElementById('courseID').value    = '';
-            document.getElementById('date').value        = '';
-            document.getElementById('starttime').value   = '';
-            document.getElementById('endtime').innerHTML = '<option value="">-- Select Start Time first --</option>';
-            document.getElementById('classroomID').innerHTML = '<option value="">-- Pick date and time first --</option>';
+        const data = { studentID, courseID, classroomID, starttime: startDatetime, endtime: endDatetime };
+
+        try {
+            const res = await fetch('/requests', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const result = await res.json();
+            document.getElementById('message').textContent = result.message;
+            document.getElementById('summary').style.display = 'none';
             document.getElementById('roomDetails').style.display = 'none';
-            document.getElementById('summary').style.display     = 'none';
-            document.getElementById('message').textContent       = '';
-            startDatetime = '';
-            endDatetime   = '';
+        } catch (err) {
+            document.getElementById('message').textContent = 'Submission failed. Please try again.';
         }
-    </script>
+    }
+
+    function resetForm() {
+        document.getElementById('studentID').value = '';
+        document.getElementById('courseID').value = '';
+        document.getElementById('date').value = '';
+        document.getElementById('starttime').value = '';
+        document.getElementById('endtime').innerHTML = '<option value="">-- Select Start Time first --</option>';
+        document.getElementById('classroomID').innerHTML = '<option value="">-- Pick date and time first --</option>';
+        document.getElementById('roomDetails').style.display = 'none';
+        document.getElementById('summary').style.display = 'none';
+        document.getElementById('message').textContent = '';
+        startDatetime = '';
+        endDatetime = '';
+    }
+</script>
 
 </body>
 </html>

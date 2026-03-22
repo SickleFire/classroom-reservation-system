@@ -5,90 +5,159 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Classroom Reservation - Register</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f6f9;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+        * {
             margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
+
+        body {
+    min-height: 100vh;
+    font-family: 'Montserrat', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #FFFFFF;
+    position: relative;
+    padding: 20px;
+    background-image: url("stdnt.jpg");
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    transition: background 0.5s ease-in-out;
+}
+
+body::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-color: rgba(0,0,0,0.7); 
+}
+
         .register-container {
-            background: #ffffff;
+            position: relative;
+            z-index: 1;
+            background: #FFFFFF;
             padding: 2rem;
             border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px #0000001A;
             width: 350px;
         }
+
         .register-container h2 {
             text-align: center;
             margin-bottom: 1rem;
-            color: #333;
+            color: #333333;
         }
+
         .toggle {
             display: flex;
-            border: 1px solid #ccc;
+            border: 1px solid #CCCCCC;
             border-radius: 4px;
             overflow: hidden;
             margin-bottom: 1.5rem;
         }
+
         .toggle button {
             flex: 1;
             padding: 0.5rem;
             border: none;
-            background: #f4f6f9;
-            color: #555;
+            background: #F4F6F9;
+            color: #555555;
             font-weight: bold;
             cursor: pointer;
             font-size: 0.9rem;
             transition: background 0.2s, color 0.2s;
         }
-        .toggle button.active-student { background: #28a745; color: #fff; }
-        .toggle button.active-teacher { background: #007bff; color: #fff; }
+
+        .toggle button.active-student {
+            background: #000000;
+            color: #FFFFFF;
+        }
+
+        .toggle button.active-teacher {
+            background: #1D95F7;
+            color: #FFFFFF;
+        }
+
         label {
             display: block;
             margin-bottom: 0.5rem;
-            color: #555;
+            color: #555555;
         }
+
         input {
             width: 100%;
             padding: 0.6rem;
             margin-bottom: 1rem;
-            border: 1px solid #ccc;
+            border: 1px solid #CCCCCC;
             border-radius: 4px;
             box-sizing: border-box;
         }
+
         .btn-student {
-            width: 100%; padding: 0.7rem;
-            background: #28a745; border: none;
-            border-radius: 4px; color: #fff;
-            font-weight: bold; cursor: pointer;
+            width: 100%;
+            padding: 0.7rem;
+            background: #050505;
+            border: none;
+            border-radius: 4px;
+            color: #FFFFFF;
+            font-weight: bold;
+            cursor: pointer;
         }
-        .btn-student:hover { background: #1e7e34; }
+
+        .btn-student:hover {
+            background: #1E7E34;
+        }
+
         .btn-teacher {
-            width: 100%; padding: 0.7rem;
-            background: #007bff; border: none;
-            border-radius: 4px; color: #fff;
-            font-weight: bold; cursor: pointer;
+            width: 100%;
+            padding: 0.7rem;
+            background: #007BFF;
+            border: none;
+            border-radius: 4px;
+            color: #FFFFFF;
+            font-weight: bold;
+            cursor: pointer;
         }
-        .btn-teacher:hover { background: #0056b3; }
+
+        .btn-teacher:hover {
+            background: #0056B3;
+        }
+
         .footer {
             text-align: center;
             margin-top: 1rem;
             font-size: 0.9rem;
         }
-        .footer a { color: #007bff; text-decoration: none; }
-        .footer a:hover { text-decoration: underline; }
+
+        .footer a {
+            color: #007BFF;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
         .message {
             text-align: center;
             font-size: 0.85rem;
             margin-top: 0.5rem;
             min-height: 20px;
         }
-        .message.error   { color: #dc3545; }
-        .message.success { color: #28a745; }
-        #phoneField { display: none; }
+
+        .message.error {
+            color: #DC3545;
+        }
+
+        .message.success {
+            color: #28A745;
+        }
+
+        #phoneField {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -96,8 +165,8 @@
         <h2>Create Account</h2>
 
         <div class="toggle">
-            <button id="btnStudent" class="active-student" onclick="switchRole('student')">Student</button>
-            <button id="btnTeacher" onclick="switchRole('teacher')">Teacher</button>
+            <button type="button" id="btnStudent" class="active-student" onclick="switchRole('student')">Student</button>
+            <button type="button" id="btnTeacher" onclick="switchRole('teacher')">Teacher</button>
         </div>
 
         <label for="firstname">First Name</label>
@@ -120,7 +189,7 @@
         <label for="confirm_password">Confirm Password</label>
         <input type="password" id="confirm_password" placeholder="••••••••" required>
 
-        <button id="registerBtn" class="btn-student" onclick="submitRegister()">Register as Student</button>
+        <button type="button" id="registerBtn" class="btn-student" onclick="submitRegister()">Register as Student</button>
         <p class="message" id="message"></p>
 
         <div class="footer">
@@ -133,51 +202,54 @@
 
         function switchRole(role) {
             currentRole = role;
-            const btnStudent  = document.getElementById('btnStudent');
-            const btnTeacher  = document.getElementById('btnTeacher');
+            const btnStudent = document.getElementById('btnStudent');
+            const btnTeacher = document.getElementById('btnTeacher');
             const registerBtn = document.getElementById('registerBtn');
-            const phoneField  = document.getElementById('phoneField');
+            const phoneField = document.getElementById('phoneField');
 
             if (role === 'student') {
-                btnStudent.className     = 'active-student';
-                btnTeacher.className     = '';
-                registerBtn.className    = 'btn-student';
-                registerBtn.textContent  = 'Register as Student';
+                btnStudent.className = 'active-student';
+                btnTeacher.className = '';
+                registerBtn.className = 'btn-student';
+                registerBtn.textContent = 'Register as Student';
                 phoneField.style.display = 'none';
+                document.body.style.background = 'url("stdnt.jpg") center / cover no-repeat';
             } else {
-                btnStudent.className     = '';
-                btnTeacher.className     = 'active-teacher';
-                registerBtn.className    = 'btn-teacher';
-                registerBtn.textContent  = 'Register as Teacher';
+                btnStudent.className = '';
+                btnTeacher.className = 'active-teacher';
+                registerBtn.className = 'btn-teacher';
+                registerBtn.textContent = 'Register as Teacher';
                 phoneField.style.display = 'block';
+                document.body.style.background = 'url("teacher.jpg") center / cover no-repeat';
             }
 
             document.getElementById('message').textContent = '';
+            document.getElementById('message').className = 'message';
         }
 
         async function submitRegister() {
-            const firstname        = document.getElementById('firstname').value;
-            const lastname         = document.getElementById('lastname').value;
-            const phone            = document.getElementById('phone').value;
-            const email            = document.getElementById('email').value;
-            const password         = document.getElementById('password').value;
+            const firstname = document.getElementById('firstname').value.trim();
+            const lastname = document.getElementById('lastname').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
             const confirm_password = document.getElementById('confirm_password').value;
-            const msgEl            = document.getElementById('message');
+            const msgEl = document.getElementById('message');
 
             if (!firstname || !lastname || !email || !password || !confirm_password) {
-                msgEl.className   = 'message error';
+                msgEl.className = 'message error';
                 msgEl.textContent = 'Please fill in all fields.';
                 return;
             }
 
             if (currentRole === 'teacher' && !phone) {
-                msgEl.className   = 'message error';
+                msgEl.className = 'message error';
                 msgEl.textContent = 'Phone number is required for teachers.';
                 return;
             }
 
             if (password !== confirm_password) {
-                msgEl.className   = 'message error';
+                msgEl.className = 'message error';
                 msgEl.textContent = 'Passwords do not match.';
                 return;
             }
@@ -187,10 +259,10 @@
                 : '/register/teacher';
 
             try {
-                const res    = await fetch(endpoint, {
-                    method:  'POST',
+                const res = await fetch(endpoint, {
+                    method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body:    JSON.stringify({ firstname, lastname, phone, email, password })
+                    body: JSON.stringify({ firstname, lastname, phone, email, password })
                 });
 
                 const result = await res.json();
@@ -200,13 +272,16 @@
                     msgEl.textContent = currentRole === 'student'
                         ? `Registered! Your Student ID is: ${result.studentID}`
                         : `Registered! Your Teacher ID is: ${result.teacherID}`;
-                    setTimeout(() => window.location.href = 'login.html', 2000);
+
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
                 } else {
-                    msgEl.className   = 'message error';
-                    msgEl.textContent = result.message;
+                    msgEl.className = 'message error';
+                    msgEl.textContent = result.message || 'Registration failed.';
                 }
             } catch (err) {
-                msgEl.className   = 'message error';
+                msgEl.className = 'message error';
                 msgEl.textContent = 'Registration failed. Please try again.';
             }
         }
