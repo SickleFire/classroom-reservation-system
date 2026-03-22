@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register Class</title>
+</head>
+<body>
+
+    <h2>Register a Class Session</h2>
+
+    <!-- Student ID -->
+    <label>Student ID:</label><br>
+    <input type="text" id="studentID" placeholder="e.g. 2023001-S" required /><br><br>
+
+    <!-- Step 1: Course -->
+    <label>Course:</label><br>
+    <select id="courseID" required>
+        <option value="">-- Select Course --</option>
+    </select><br><br>
+
+    <!-- Step 2: Date -->
+    <label>Date:</label><br>
+    <input type="date" id="date" required /><br><br>
+
+    <!-- Step 3: Start Time -->
+    <label>Start Time:</label><br>
+    <select id="starttime" onchange="updateEndTimes()" required>
+        <option value="">-- Select Start Time --</option>
+    </select><br><br>
+
+    <!-- Step 4: End Time (filtered by start time) -->
+    <label>End Time:</label><br>
+    <select id="endtime" onchange="loadRooms()" required>
+        <option value="">-- Select Start Time first --</option>
+    </select><br><br>
+
+    <!-- Step 5: Available Rooms -->
+    <label>Available Room:</label><br>
+    <select id="classroomID" onchange="showRoomDetails()" required>
+        <option value="">-- Pick date and time first --</option>
+    </select><br><br>
+
+    <!-- Room Details -->
+    <div id="roomDetails" style="display:none;">
+        <strong>Room Details:</strong><br>
+        <span id="roomName"></span><br>
+        <span id="roomID"></span><br>
+        <span id="roomCategory"></span><br>
+    </div><br>
+
+    <!-- Summary -->
+    <div id="summary" style="display:none;">
+        <strong>Summary:</strong><br>
+        <span id="summaryText"></span><br><br>
+        <button onclick="submitClass()">Confirm</button>
+    </div>
+
+    <p id="message"></p>
+
+    <script>
+        let availableRooms = [];
+        let startDatetime  = '';
+        let endDatetime    = '';
+
+        // All time slots from 7AM to 10PM in minutes from midnight
+        const allSlots = [];
+        for (let hour = 7; hour <= 22; hour++) {
+            const minutes = hour === 22 ? [0] : [0, 30];
+            minutes.forEach(min => {
+                allSlots.push({ hour, min });
+            });
+        }
+
+        // Convert 24hr to 12hr AM/PM label
+        function toAMPM(hour, min) {
+            const period = hour >= 12 ? 'PM' : 'AM';
+            const h      = hour % 12 === 0 ? 12 : hour % 12;
+            return `${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')} ${period}`;
+        }
+
+        // Convert hour+min to total minutes for easy comparison
+        function toMinutes(hour, min) {
+            return hour * 60 + min;
+        }
+
+        // Populate start time dropdown (7AM to 7PM max so 3hr end fits before 10PM)
+        function generateStartTimes() {
+            const startSelect = document.getElementById('starttime');
+            allSlots.forEach(slot => {
+                // Start time max is 7:00 PM (19:00) so end time 10:00 PM is still within range
+                if (toMinutes(slot.hour, slot.min) <= toMinutes(19, 0)) {
+                    const hh         = String(slot.hour).padStart(2, '0');
+                    const mm         = String(slot.min).padStart(2, '0');
+                    const opt        = document.createElement('option');
+                    opt.value        = `${hh}:${mm}`;
+                    opt.textContent  = toAMPM(slot.hour, slot.min);
+                    opt.dataset.hour = slot.hour;
+                    opt.dataset.min  = slot.min;
+                    startSelect.appendChild(opt);
+                }
+            });
+        }
+
+        // Update end time dropdown based on selected start time (max 3 hours ahead)
+        function updateEndTimes() {
+            const startSelect  = document.getElementById('starttime');
+            const endSelect    = document.getElementById('endtime');
+            const selectedOpt  = startSelect.selectedOptions[0];
+
+            endSelect.innerHTML = '<option value="">-- Select End Time --</option>';
+            document.getElementById('classroomID').innerHTML = '<option value="">-- Pick date and time first --</option>';
+            document.getElementById('roomDetails').style.display = 'none';
+            document.getElementById('summary').style.display     = 'none';
+
+            if (!selectedOpt || !selectedOpt.value) return;
+
+            const startHour = parseInt(selectedOpt.dataset.hour);
+            const startMin  = parseInt(selectedOpt.dataset.min);
+            const startMins = toMinutes(startHour, startMin);
+            const maxMins   = startMins + (3 * 60); // 3 hours max
+
+            allSlots.forEach(slot => {
+                const slotMins = toMinutes(slot.hour, slot.min);
+
+                // Only show slots AFTER start time and within 3 hours
+                if (slotMins > startMins && slotMins <= maxMins && slotMins <= toMinutes(22, 0)) {
+                    const hh        = String(slot.hour).padStart(2, '0');
+                    const mm        = String(slot.min).padStart(2, '0');
+                    const opt       = document.createElement('option');
+                    opt.value       = `${hh}:${mm}`;
+                    opt.textContent = toAMPM(slot.hour, slot.min);
+                    endSelect.appendChild(opt);
+                }
+            });
+        }
+
+        // Load courses from database
+        async function loadCourses() {
+            try {
+                const res      = await fetch('/schedule/courses');
+                const courses  = await res.json();
+                const dropdown = document.getElementById('courseID');
+
+                courses.forEach(c => {
+                    const option       = document.createElement('option');
+                    option.value       = c.courseID;
+                    option.textContent = `${c.name} - ${c.description}`;
+                    dropdown.appendChild(option);
+                });
+            } catch (err) {
+                console.error('Failed to load courses:', err);
+            }
+        }
+
+        // Run on page load
+        window.onload = () => {
+            generateStartTimes();
+            loadCourses();
+        };
+
+        // Combine date + time into datetime string
+        function buildDatetime() {
+            const date  = document.getElementById('date').value;
+            const start = document.getElementById('starttime').value;
+            const end   = document.getElementById('endtime').value;
+
+            if (date && start) startDatetime = `${date} ${start}:00`;
+            if (date && end)   endDatetime   = `${date} ${end}:00`;
+        }
+
+        // Load available rooms based on selected time
+        async function loadRooms() {
+            buildDatetime();
+
+            if (!startDatetime || !endDatetime) return;
+
+            try {
+                const res      = await fetch(`/schedule/available-rooms?starttime=${startDatetime}&endtime=${endDatetime}`);
+                availableRooms = await res.json();
+
+                const dropdown = document.getElementById('classroomID');
+                dropdown.innerHTML = '<option value="">-- Select a Room --</option>';
+
+                if (availableRooms.length === 0) {
+                    dropdown.innerHTML = '<option value="">No rooms available for this time</option>';
+                    return;
+                }
+
+                availableRooms.forEach(r => {
+                    const option       = document.createElement('option');
+                    option.value       = r.classroomID;
+                    option.textContent = `${r.name} (${r.category})`;
+                    dropdown.appendChild(option);
+                });
+            } catch (err) {
+                console.error('Failed to load rooms:', err);
+            }
+        }
+
+        // Show room details and summary
+        function showRoomDetails() {
+            const classroomID = document.getElementById('classroomID').value;
+            const room        = availableRooms.find(r => r.classroomID == classroomID);
+            if (!room) return;
+
+            document.getElementById('roomDetails').style.display = 'block';
+            document.getElementById('roomName').textContent      = `Room Name: ${room.name}`;
+            document.getElementById('roomID').textContent        = `Room ID: ${room.classroomID}`;
+            document.getElementById('roomCategory').textContent  = `Category: ${room.category}`;
+
+            const courseName = document.getElementById('courseID').selectedOptions[0].text;
+            const studentID  = document.getElementById('studentID').value;
+            const startLabel = document.getElementById('starttime').selectedOptions[0].text;
+            const endLabel   = document.getElementById('endtime').selectedOptions[0].text;
+
+            document.getElementById('summary').style.display = 'block';
+            document.getElementById('summaryText').innerHTML  = `
+                Student ID: ${studentID}<br>
+                Course: ${courseName}<br>
+                Start: ${startLabel}<br>
+                End: ${endLabel}<br>
+                Room: ${room.name} (ID: ${room.classroomID})<br>
+                Category: ${room.category}
+            `;
+        }
+
+        // Submit class booking
+        async function submitClass() {
+            const studentID = document.getElementById('studentID').value;
+
+            if (!studentID) {
+                document.getElementById('message').textContent = 'Please enter your Student ID.';
+                return;
+            }
+
+            const data = {
+                studentID:   studentID,
+                courseID:    document.getElementById('courseID').value,
+                classroomID: document.getElementById('classroomID').value,
+                starttime:   startDatetime,
+                endtime:     endDatetime
+            };
+
+            try {
+                const res    = await fetch('/requests', {
+                    method:  'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body:    JSON.stringify(data)
+                });
+
+                const result = await res.json();
+                document.getElementById('message').textContent       = result.message;
+                document.getElementById('summary').style.display     = 'none';
+                document.getElementById('roomDetails').style.display = 'none';
+            } catch (err) {
+                document.getElementById('message').textContent = 'Submission failed. Please try again.';
+            }
+        }
+    </script>
+
+</body>
+</html>

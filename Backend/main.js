@@ -1,4 +1,5 @@
 const express = require('express');
+const bcrypt = require('bcrypt')
 require('dotenv').config();
 const mysql = require('mysql2').createPool({
     host:     process.env.DB_HOST,
