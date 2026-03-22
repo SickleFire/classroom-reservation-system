@@ -1,7 +1,7 @@
 const express = require('express');
-const session = require('express-session');
-const bcrypt = require('bcrypt')
+const bcrypt  = require('bcrypt');
 require('dotenv').config();
+
 const mysql = require('mysql2').createPool({
     host:     process.env.DB_HOST,
     port:     process.env.DB_PORT,
@@ -9,27 +9,20 @@ const mysql = require('mysql2').createPool({
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME
 }).promise();
+
 const path = require('path');
 const app  = express();
- 
+
 // Serve static HTML files from Frontend folder
 app.use(express.static(path.join(__dirname, '..', 'Frontend')));
- 
+
 // Parse form data
 app.use(express.urlencoded({ extended: true }));
- 
+
 // Parse JSON
 app.use(express.json());
 
-// Use Sessions
-app.use(session({
-    secret: 'supersecretkey',   // change this to a strong secret
-    resave: false,
-    saveUninitialized: false,
-    cookie: { secure: false }   // set secure:true if using HTTPS
-}));
- 
-// Create reservations table on startup
+// Create tables on startup
 async function initDB() {
     try {
         await mysql.query(`
@@ -46,83 +39,171 @@ async function initDB() {
                 password  TEXT NOT NULL
             )
         `);
-        console.log('Reservations table ready.');
+        console.log('Database tables ready.');
     } catch (err) {
         console.error('DB init error:', err);
     }
 }
- 
-// GET / → serves index.html (handled by express.static above)
-// GET /about → serves about.html (handled by express.static above)
- 
-// POST /reserve → insert reservation into MySQL
+
+// ─── RESERVE ─────────────────────────────────────────────────────────────────
+
 app.post('/reserve', async (req, res) => {
     const { room, time } = req.body;
- 
     console.log(`Parsed reservation: room=${room} time=${time}`);
- 
     try {
         await mysql.query(
             'INSERT INTO reservations (room_name, time) VALUES (?, ?)',
             [room, time]
         );
         res.send(`<h1>Reservation received for room ${room} at ${time}</h1>`);
- 
     } catch (err) {
         console.error('Insert error:', err);
         res.status(500).send('<h1>Something went wrong.</h1>');
     }
 });
 
+// ─── LOGIN (handles Student, Teacher, Admin automatically) ───────────────────
+
 app.post('/login', async (req, res) => {
-    const { email, password} = req.body;
-    console.log(`Parsed Information: email=${email} password=${password}`);
-    if (email === 'admin' && password === 'lumecraft') {
-        req.session.user = {email: 'admin'};
-        res.redirect('dashboard.html');
-    }else if (email !== '' && password !== '') {
-        //User Authentication MySQL
-        try {
-            const [rows] = await mysql.query('SELECT password FROM users WHERE email = ?', [email]);
-            if (rows.length === 0) {
-                return res.status(401).send('Invalid email or password');
-            }
-            const user = rows[0];
-            const match = await bcrypt.compare(password, user.password);
-            if (match) {
-                req.session.user = {email};
-                res.redirect('/dashboard.html'); // send to dashboard
-            } else {
-                res.status(401).send('Invalid email or password');
-            }
-        }catch (err){
-            res.status(500).send('Error logging in: ' + err.message);
-        }
-    } 
-    else {
-        res.status(401).send('Invalid credentials');
-    }
-})
-
-app.post('/register', async(req, res) =>{
-    const {fullname, email, password, confirm_password} = req.body;
-    console.log(`/Parsed Information: firstname=${fullname} email=${email} password=${password} confirm_password=${confirm_password}`);
-    if (password !== confirm_password) {
-        return res.status(400).send('Passwords do not match');
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const { email, password } = req.body;
 
     try {
-        await mysql.query(
-            'INSERT INTO users (fullname, email, password) VALUES (?, ?, ?)',
-            [fullname, email, hashedPassword]
+        // 1. Find user by email
+        const [rows] = await mysql.query(
+            'SELECT * FROM Users WHERE email = ?', [email]
         );
-        res.send('Registration successful! You can now log in.');
+
+        if (rows.length === 0) {
+            return res.status(401).json({ message: 'Invalid email or password.' });
+        }
+
+        const user  = rows[0];
+
+        // 2. Check password
+        const match = await bcrypt.compare(password, user.password);
+        if (!match) {
+            return res.status(401).json({ message: 'Invalid email or password.' });
+        }
+
+        // 3. Check role by looking up Students and Teachers tables
+        const [students] = await mysql.query(
+            'SELECT studentID FROM Students WHERE userID = ?', [user.userID]
+        );
+        const [teachers] = await mysql.query(
+            'SELECT teacherID FROM Teachers WHERE userID = ?', [user.userID]
+        );
+
+        let role      = 'admin';
+        let studentID = null;
+        let teacherID = null;
+
+        if (students.length > 0) {
+            role      = 'student';
+            studentID = students[0].studentID;
+        } else if (teachers.length > 0) {
+            role      = 'teacher';
+            teacherID = teachers[0].teacherID;
+        }
+        // else → no studentID and no teacherID = admin
+
+        res.json({
+            message:   'Login successful!',
+            role,
+            fullname:  user.fullname,
+            studentID,
+            teacherID,
+            redirect:  'dashboard.html'
+        });
+
     } catch (err) {
-        res.status(500).send('Error registering user: ' + err.message);
+        console.error('Login error:', err);
+        res.status(500).json({ message: 'Login failed: ' + err.message });
     }
-})
+});
+
+// ─── REGISTER STUDENT ────────────────────────────────────────────────────────
+
+app.post('/register/student', async (req, res) => {
+    const { firstname, lastname, email, password } = req.body;
+
+    try {
+        // Check if email already exists
+        const [existing] = await mysql.query(
+            'SELECT userID FROM Users WHERE email = ?', [email]
+        );
+        if (existing.length > 0) {
+            return res.status(400).json({ message: 'Email already registered.' });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Insert into Users
+        const [userResult] = await mysql.query(
+            'INSERT INTO Users (fullname, email, password, account_created) VALUES (?, ?, ?, NOW())',
+            [`${firstname} ${lastname}`, email, hashedPassword]
+        );
+        const userID = userResult.insertId;
+
+        // Generate studentID: 2026 + 3-digit count + -S
+        const [countResult] = await mysql.query('SELECT COUNT(*) AS count FROM Students');
+        const nextNum   = countResult[0].count + 1;
+        const studentID = `2026${String(nextNum).padStart(3, '0')}-S`;
+
+        // Insert into Students
+        await mysql.query(
+            'INSERT INTO Students (studentID, firstname, lastname, phone, userID) VALUES (?, ?, ?, ?, ?)',
+            [studentID, firstname, lastname, null, userID]
+        );
+
+        res.json({ message: 'Registered successfully!', studentID });
+
+    } catch (err) {
+        console.error('Student register error:', err);
+        res.status(500).json({ message: 'Registration failed: ' + err.message });
+    }
+});
+
+// ─── REGISTER TEACHER ────────────────────────────────────────────────────────
+
+app.post('/register/teacher', async (req, res) => {
+    const { firstname, lastname, phone, email, password } = req.body;
+
+    try {
+        // Check if email already exists
+        const [existing] = await mysql.query(
+            'SELECT userID FROM Users WHERE email = ?', [email]
+        );
+        if (existing.length > 0) {
+            return res.status(400).json({ message: 'Email already registered.' });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Insert into Users
+        const [userResult] = await mysql.query(
+            'INSERT INTO Users (fullname, email, password, account_created) VALUES (?, ?, ?, NOW())',
+            [`${firstname} ${lastname}`, email, hashedPassword]
+        );
+        const userID = userResult.insertId;
+
+        // Generate teacherID: 001, 002, 003...
+        const [countResult] = await mysql.query('SELECT COUNT(*) AS count FROM Teachers');
+        const nextNum   = countResult[0].count + 1;
+        const teacherID = String(nextNum).padStart(3, '0');
+
+        // Insert into Teachers
+        await mysql.query(
+            'INSERT INTO Teachers (teacherID, firstname, lastname, phone, userID) VALUES (?, ?, ?, ?, ?)',
+            [teacherID, firstname, lastname, phone, userID]
+        );
+
+        res.json({ message: 'Registered successfully!', teacherID });
+
+    } catch (err) {
+        console.error('Teacher register error:', err);
+        res.status(500).json({ message: 'Registration failed: ' + err.message });
+    }
+});
 
 // ─── GET COURSES (for registerclass.html dropdown) ───────────────────────────
 
@@ -168,9 +249,6 @@ app.get('/schedule/available-rooms', async (req, res) => {
     }
 });
 
-app.get('/dashboard.html', requireLogin, (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'Frontend', 'dashboard.html'));
-});
 // ─── POST REQUESTS (student submits room request) ─────────────────────────────
 
 app.post('/requests', async (req, res) => {
@@ -231,18 +309,11 @@ app.get('/admin/users', async (req, res) => {
     }
 });
 
-function requireLogin(req, res, next) {
-    if (!req.session.user) {
-        return res.redirect('/login.html');
-    }
-    next();
-}
-
 // 404 handler
 app.use((req, res) => {
     res.status(404).sendFile(path.join(__dirname, '..', 'Frontend', '404.html'));
 });
- 
+
 // Start server on port 7878
 initDB().then(() => {
     app.listen(7878, '127.0.0.1', () => {
