@@ -354,6 +354,8 @@ app.use((req, res) => {
     res.status(404).sendFile(path.join(__dirname, '..', 'Frontend', '404.html'));
 });
 
+app.use(reservationsRoutes);
+ 
 // Start server on port 7878
 initDB().then(() => {
     app.listen(7878, '127.0.0.1', () => {
