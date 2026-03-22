@@ -290,12 +290,14 @@
             const courseName = document.getElementById('courseID').selectedOptions[0].text;
             const studentID  = document.getElementById('studentID').value;
             const startLabel = document.getElementById('starttime').selectedOptions[0].text;
+            const date       = document.getElementById('date').value;
             const endLabel   = document.getElementById('endtime').selectedOptions[0].text;
 
             document.getElementById('summary').style.display = 'block';
             document.getElementById('summaryText').innerHTML  = `
                 Student ID: ${studentID}<br>
                 Course: ${courseName}<br>
+                Date: ${date}<br>
                 Start: ${startLabel}<br>
                 End: ${endLabel}<br>
                 Room: ${room.name} (ID: ${room.classroomID})<br>
