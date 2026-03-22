@@ -1,5 +1,11 @@
 const express = require('express');
+<<<<<<< Updated upstream
 const bcrypt  = require('bcrypt');
+=======
+const session = require('express-session');
+const bcrypt = require('bcrypt')
+const reservationsRoutes = require('./reservations.js');
+>>>>>>> Stashed changes
 require('dotenv').config();
 
 const mysql = require('mysql2').createPool({
@@ -313,7 +319,12 @@ app.get('/admin/users', async (req, res) => {
 app.use((req, res) => {
     res.status(404).sendFile(path.join(__dirname, '..', 'Frontend', '404.html'));
 });
+<<<<<<< Updated upstream
 
+=======
+app.use(reservationsRoutes);
+ 
+>>>>>>> Stashed changes
 // Start server on port 7878
 initDB().then(() => {
     app.listen(7878, '127.0.0.1', () => {
