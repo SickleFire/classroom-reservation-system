@@ -29,6 +29,14 @@ async function initDB() {
                 time      TEXT NOT NULL
             )
         `);
+        await mysql.query(`
+            CREATE TABLE IF NOT EXISTS users (
+                firstname TEXT NOT NULL,
+                lastname  TEXT NOT NULL,
+                email     TEXT NOT NULL,
+                password  TEXT NOT NULL
+            )
+        `);
         console.log('Reservations table ready.');
     } catch (err) {
         console.error('DB init error:', err);
@@ -58,12 +66,27 @@ app.post('/reserve', async (req, res) => {
 });
 
 app.post('/login', async (req, res) => {
-    const { username, password} = req.body;
-    console.log(`Parsed Information: email=${username} password=${password}`);
-    if (username === 'admin' && password === 'lumecraft') {
+    const { email, password} = req.body;
+    console.log(`Parsed Information: email=${email} password=${password}`);
+    if (email === 'admin' && password === 'lumecraft') {
         res.redirect('dashboard.html');
-    }else if (false) {
+    }else if (email !== '' && password !== '') {
         //User Authentication MySQL
+        try {
+            const [rows] = await mysql.query('SELECT password FROM users WHERE email = ?', [email]);
+            if (rows.length === 0) {
+                return res.status(401).send('Invalid email or password');
+            }
+            const user = rows[0];
+            const match = await bcrypt.compare(password, user.password);
+            if (match) {
+                res.redirect('/dashboard.html'); // send to dashboard
+            } else {
+                res.status(401).send('Invalid email or password');
+            }
+        }catch (err){
+            res.status(500).send('Error logging in: ' + err.message);
+        }
     } 
     else {
         res.status(401).send('Invalid credentials');
@@ -71,16 +94,16 @@ app.post('/login', async (req, res) => {
 })
 
 app.post('/register', async(req, res) =>{
-    const {fullname, email, password, confirmpassword} = req.body;
-    console.log(`/Parsed Information: fullname=${fullname} email=${email} password=${password} confirm-password=${confirmpassword}`);
-    if (password !== confirmpassword) {
+    const {fullname, email, password, confirm_password} = req.body;
+    console.log(`/Parsed Information: firstname=${fullname} email=${email} password=${password} confirm_password=${confirm_password}`);
+    if (password !== confirm_password) {
         return res.status(400).send('Passwords do not match');
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
     try {
-        await pool.query(
+        await mysql.query(
             'INSERT INTO users (fullname, email, password) VALUES (?, ?, ?)',
             [fullname, email, hashedPassword]
         );
