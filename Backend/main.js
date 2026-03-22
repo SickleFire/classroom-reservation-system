@@ -112,7 +112,87 @@ app.post('/register', async(req, res) =>{
         res.status(500).send('Error registering user: ' + err.message);
     }
 })
- 
+
+// ─── GET COURSES (for registerclass.html dropdown) ───────────────────────────
+
+app.get('/schedule/courses', async (req, res) => {
+    try {
+        const [courses] = await mysql.query(
+            'SELECT courseID, name, description FROM Courses'
+        );
+        res.json(courses);
+    } catch (err) {
+        console.error('Courses error:', err);
+        res.status(500).json({ message: 'Failed to load courses.' });
+    }
+});
+
+// ─── GET AVAILABLE ROOMS (for registerclass.html dropdown) ───────────────────
+
+app.get('/schedule/available-rooms', async (req, res) => {
+    const { starttime, endtime } = req.query;
+
+    if (!starttime || !endtime) {
+        return res.status(400).json({ message: 'Start time and end time are required.' });
+    }
+
+    try {
+        const [rooms] = await mysql.query(`
+            SELECT c.classroomID, c.name, c.category, c.description, c.BYOD
+            FROM Classrooms c
+            WHERE c.is_available = 1
+            AND c.classroomID NOT IN (
+                SELECT i.classroomID
+                FROM Implementations i
+                WHERE i.status IN ('Pending', 'Approved')
+                AND i.starttime < ?
+                AND i.endtime   > ?
+            )
+        `, [endtime, starttime]);
+
+        res.json(rooms);
+    } catch (err) {
+        console.error('Available rooms error:', err);
+        res.status(500).json({ message: 'Failed to fetch available rooms.' });
+    }
+});
+
+// ─── POST REQUESTS (student submits room request) ─────────────────────────────
+
+app.post('/requests', async (req, res) => {
+    const { studentID, courseID, classroomID, starttime, endtime } = req.body;
+
+    if (!studentID || !courseID || !classroomID || !starttime || !endtime) {
+        return res.status(400).json({ message: 'All fields are required.' });
+    }
+
+    try {
+        const [conflicts] = await mysql.query(`
+            SELECT implementationID FROM Implementations
+            WHERE classroomID = ?
+            AND status IN ('Pending', 'Approved')
+            AND starttime < ?
+            AND endtime   > ?
+        `, [classroomID, endtime, starttime]);
+
+        if (conflicts.length > 0) {
+            return res.status(409).json({ message: 'Room is already taken for that time slot.' });
+        }
+
+        await mysql.query(`
+            INSERT INTO Implementations
+                (courseID, is_onlineclass, starttime, endtime, teacherID, classroomID, status, requested_by)
+            VALUES (?, 0, ?, ?, NULL, ?, 'Pending', ?)
+        `, [courseID, starttime, endtime, classroomID, studentID]);
+
+        res.json({ message: 'Room request submitted successfully! Waiting for approval.' });
+
+    } catch (err) {
+        console.error('Request error:', err);
+        res.status(500).json({ message: 'Failed to submit request.' });
+    }
+});
+
 // 404 handler
 app.use((req, res) => {
     res.status(404).sendFile(path.join(__dirname, '..', 'Frontend', '404.html'));
