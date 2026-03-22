@@ -27,17 +27,6 @@ router.post('/reserve', async (req, res) => {
 
     res.send(`<h1>Reservation received for room ${room} at ${time}</h1>`);
 
-    //DEPRECATED SQL HANDLING MOVED TO RUST SERVICES FOR PERFORMANCE
-    /*try {
-        await mysql.query(
-            'INSERT INTO reservations (room_name, time) VALUES (?, ?)',
-            [room, time]
-        );
-        res.send(`<h1>Reservation received for room ${room} at ${time}</h1>`);
-    } catch (err) {
-        console.error('Insert error:', err);
-        res.status(500).send('<h1>Something went wrong.</h1>');
-    }*/
 });
 
 module.exports = router;
