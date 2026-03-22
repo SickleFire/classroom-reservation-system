@@ -1,4 +1,5 @@
 const express = require('express');
+const session = require('express-session');
 const bcrypt = require('bcrypt')
 require('dotenv').config();
 const mysql = require('mysql2').createPool({
@@ -19,6 +20,14 @@ app.use(express.urlencoded({ extended: true }));
  
 // Parse JSON
 app.use(express.json());
+
+// Use Sessions
+app.use(session({
+    secret: 'supersecretkey',   // change this to a strong secret
+    resave: false,
+    saveUninitialized: false,
+    cookie: { secure: false }   // set secure:true if using HTTPS
+}));
  
 // Create reservations table on startup
 async function initDB() {
@@ -69,6 +78,7 @@ app.post('/login', async (req, res) => {
     const { email, password} = req.body;
     console.log(`Parsed Information: email=${email} password=${password}`);
     if (email === 'admin' && password === 'lumecraft') {
+        req.session.user = {email: 'admin'};
         res.redirect('dashboard.html');
     }else if (email !== '' && password !== '') {
         //User Authentication MySQL
@@ -80,6 +90,7 @@ app.post('/login', async (req, res) => {
             const user = rows[0];
             const match = await bcrypt.compare(password, user.password);
             if (match) {
+                req.session.user = {email};
                 res.redirect('/dashboard.html'); // send to dashboard
             } else {
                 res.status(401).send('Invalid email or password');
@@ -157,6 +168,9 @@ app.get('/schedule/available-rooms', async (req, res) => {
     }
 });
 
+app.get('/dashboard.html', requireLogin, (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'Frontend', 'dashboard.html'));
+});
 // ─── POST REQUESTS (student submits room request) ─────────────────────────────
 
 app.post('/requests', async (req, res) => {
@@ -216,6 +230,13 @@ app.get('/admin/users', async (req, res) => {
         res.status(500).json({ message: 'Failed to load users.' });
     }
 });
+
+function requireLogin(req, res, next) {
+    if (!req.session.user) {
+        return res.redirect('/login.html');
+    }
+    next();
+}
 
 // 404 handler
 app.use((req, res) => {
