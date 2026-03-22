@@ -6,7 +6,6 @@
     <title>Register Class</title>
 
    <style>
-
     * {
         margin: 0;
         padding: 0;
@@ -20,7 +19,7 @@
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        color: #ffffff;
+        color: #FFFFFF;
         position: relative;
         padding: 20px;
         background: url("classroom.jpg") center / cover no-repeat;
@@ -30,7 +29,7 @@
         content: "";
         position: absolute;
         inset: 0;
-        background: #000000d0;
+        background: #000000D0;
         z-index: 0;
     }
 
@@ -51,8 +50,7 @@
     }
 
     input,
-    select,
-    button {
+    select {
         width: 100%;
         max-width: 400px;
         padding: 10px;
@@ -60,29 +58,30 @@
         border: none;
         border-radius: 6px;
         font-size: 16px;
+        background: #FFFFFF;
+        color: #000000;
     }
 
-    input,
-    select {
-        background: #ffffff;
+    button {
+        padding: 10px 16px;
+        margin-bottom: 15px;
+        border: none;
+        border-radius: 6px;
+        font-size: 16px;
+        background-color: #000000;
+        color: #FFFFFF;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    button:hover {
+        background-color: #FFFBF0;
         color: #000000;
     }
 
     .bckbtn {
         align-self: flex-start;
         width: 100px;
-    }
-
-    button {
-        background-color: #2b43b7;
-        color: #fffbfb;
-        cursor: pointer;
-        font-weight: bold;
-        width: 100px;
-    }
-
-    button:hover {
-        background-color: #4072be;
     }
 
     #roomDetails,
@@ -92,6 +91,23 @@
         max-width: 400px;
         margin-bottom: 15px;
         text-align: left;
+    }
+
+    #summary {
+        display: none;
+        background: #FFFFFF1F;
+        border: 1px solid #FFFFFF33;
+        border-radius: 10px;
+        padding: 15px;
+        backdrop-filter: blur(6px);
+        box-shadow: 0 4px 10px #00000033;
+    }
+
+    #roomDetails {
+        display: none;
+        background: #FFFFFF14;
+        border-radius: 10px;
+        padding: 15px;
     }
 
     #message {
@@ -106,39 +122,32 @@
 
     <h2>Register a Class Session</h2>
 
-    <!-- Student ID -->
     <label>Student ID:</label><br>
     <input type="text" id="studentID" placeholder="e.g. 2023001-S" required /><br><br>
 
-    <!-- Step 1: Course -->
     <label>Course:</label><br>
     <select id="courseID" required>
         <option value="">-- Select Course --</option>
     </select><br><br>
 
-    <!-- Step 2: Date -->
     <label>Date:</label><br>
     <input type="date" id="date" required /><br><br>
 
-    <!-- Step 3: Start Time -->
     <label>Start Time:</label><br>
     <select id="starttime" onchange="updateEndTimes()" required>
         <option value="">-- Select Start Time --</option>
     </select><br><br>
 
-    <!-- Step 4: End Time -->
     <label>End Time:</label><br>
     <select id="endtime" onchange="loadRooms()" required>
         <option value="">-- Select Start Time first --</option>
     </select><br><br>
 
-    <!-- Step 5: Available Rooms -->
     <label>Available Room:</label><br>
     <select id="classroomID" onchange="showRoomDetails()" required>
         <option value="">-- Pick date and time first --</option>
     </select><br><br>
 
-    <!-- Room Details -->
     <div id="roomDetails" style="display:none;">
         <strong>Room Details:</strong><br>
         <span id="roomName"></span><br>
@@ -146,13 +155,11 @@
         <span id="roomCategory"></span><br>
     </div><br>
 
-    <!-- Summary -->
     <div id="summary" style="display:none;">
         <strong>Summary:</strong><br>
         <span id="summaryText"></span><br><br>
     </div>
 
-    <!-- Buttons -->
     <button onclick="submitClass()">Submit</button>
     <button onclick="resetForm()">Clear</button>
 
