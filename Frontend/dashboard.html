@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <title>Admin Dashboard - Classroom Reservation</title>
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -91,6 +94,12 @@
         </aside>
 
         <main class="content">
+
+            <div class="card">
+                <h4>Reservation Calendar</h4>
+                <div id="calendar"></div>
+            </div>
+
             <div class="card">
                 <h4>System Stats</h4>
                 <p>Total Reservations: 120</p>
@@ -118,5 +127,21 @@
     <footer>
         <p>&copy; 2026 Classroom Reservation System</p>
     </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+        var calendarEl = document.getElementById('calendar');
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            events: '/reserve-events', // backend endpoint returning reservations
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,timeGridDay'
+            }
+        });
+            calendar.render();
+        });
+    </script>
 </body>
 </html>

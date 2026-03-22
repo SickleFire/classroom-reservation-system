@@ -1,5 +1,7 @@
 const express = require('express');
+const session = require('express-session');
 const bcrypt  = require('bcrypt');
+const reservationsRoutes = require('./reservations.js');
 require('dotenv').config();
 
 const mysql = require('mysql2').createPool({
@@ -21,6 +23,9 @@ app.use(express.urlencoded({ extended: true }));
 
 // Parse JSON
 app.use(express.json());
+
+// Reservations routes
+app.use(reservationsRoutes);
 
 // Create tables on startup
 async function initDB() {
@@ -68,7 +73,6 @@ app.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
     try {
-        // 1. Find user by email
         const [rows] = await mysql.query(
             'SELECT * FROM Users WHERE email = ?', [email]
         );
@@ -78,14 +82,12 @@ app.post('/login', async (req, res) => {
         }
 
         const user  = rows[0];
-
-        // 2. Check password
         const match = await bcrypt.compare(password, user.password);
+
         if (!match) {
             return res.status(401).json({ message: 'Invalid email or password.' });
         }
 
-        // 3. Check role by looking up Students and Teachers tables
         const [students] = await mysql.query(
             'SELECT studentID FROM Students WHERE userID = ?', [user.userID]
         );
@@ -104,15 +106,14 @@ app.post('/login', async (req, res) => {
             role      = 'teacher';
             teacherID = teachers[0].teacherID;
         }
-        // else → no studentID and no teacherID = admin
 
         res.json({
-            message:   'Login successful!',
+            message:  'Login successful!',
             role,
             fullname:  user.fullname,
             studentID,
             teacherID,
-            redirect:  'dashboard.html'
+            redirect: 'dashboard.html'
         });
 
     } catch (err) {
@@ -124,10 +125,9 @@ app.post('/login', async (req, res) => {
 // ─── REGISTER STUDENT ────────────────────────────────────────────────────────
 
 app.post('/register/student', async (req, res) => {
-    const { firstname, lastname, email, password } = req.body;
+    const { firstname, lastname, phone, email, password } = req.body;
 
     try {
-        // Check if email already exists
         const [existing] = await mysql.query(
             'SELECT userID FROM Users WHERE email = ?', [email]
         );
@@ -137,22 +137,19 @@ app.post('/register/student', async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Insert into Users
         const [userResult] = await mysql.query(
             'INSERT INTO Users (fullname, email, password, account_created) VALUES (?, ?, ?, NOW())',
             [`${firstname} ${lastname}`, email, hashedPassword]
         );
         const userID = userResult.insertId;
 
-        // Generate studentID: 2026 + 3-digit count + -S
         const [countResult] = await mysql.query('SELECT COUNT(*) AS count FROM Students');
         const nextNum   = countResult[0].count + 1;
         const studentID = `2026${String(nextNum).padStart(3, '0')}-S`;
 
-        // Insert into Students
         await mysql.query(
             'INSERT INTO Students (studentID, firstname, lastname, phone, userID) VALUES (?, ?, ?, ?, ?)',
-            [studentID, firstname, lastname, null, userID]
+            [studentID, firstname, lastname, phone, userID]
         );
 
         res.json({ message: 'Registered successfully!', studentID });
@@ -169,7 +166,6 @@ app.post('/register/teacher', async (req, res) => {
     const { firstname, lastname, phone, email, password } = req.body;
 
     try {
-        // Check if email already exists
         const [existing] = await mysql.query(
             'SELECT userID FROM Users WHERE email = ?', [email]
         );
@@ -179,19 +175,16 @@ app.post('/register/teacher', async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Insert into Users
         const [userResult] = await mysql.query(
             'INSERT INTO Users (fullname, email, password, account_created) VALUES (?, ?, ?, NOW())',
             [`${firstname} ${lastname}`, email, hashedPassword]
         );
         const userID = userResult.insertId;
 
-        // Generate teacherID: 001, 002, 003...
         const [countResult] = await mysql.query('SELECT COUNT(*) AS count FROM Teachers');
         const nextNum   = countResult[0].count + 1;
         const teacherID = String(nextNum).padStart(3, '0');
 
-        // Insert into Teachers
         await mysql.query(
             'INSERT INTO Teachers (teacherID, firstname, lastname, phone, userID) VALUES (?, ?, ?, ?, ?)',
             [teacherID, firstname, lastname, phone, userID]
@@ -296,7 +289,12 @@ app.get('/admin/users', async (req, res) => {
                 u.email,
                 u.account_created,
                 s.studentID,
-                t.teacherID
+                t.teacherID,
+                CASE
+                    WHEN s.studentID IS NOT NULL THEN 'Student'
+                    WHEN t.teacherID IS NOT NULL THEN 'Teacher'
+                    ELSE 'Admin'
+                END AS role
             FROM Users u
             LEFT JOIN Students s ON u.userID = s.userID
             LEFT JOIN Teachers t ON u.userID = t.userID
@@ -306,6 +304,48 @@ app.get('/admin/users', async (req, res) => {
     } catch (err) {
         console.error('Get users error:', err);
         res.status(500).json({ message: 'Failed to load users.' });
+    }
+});
+
+// ─── DELETE USER ─────────────────────────────────────────────────────────────
+
+app.delete('/admin/users/:id', async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        // Get studentID and teacherID first
+        const [students] = await mysql.query(
+            'SELECT studentID FROM Students WHERE userID = ?', [id]
+        );
+        const [teachers] = await mysql.query(
+            'SELECT teacherID FROM Teachers WHERE userID = ?', [id]
+        );
+
+        // Delete Implementations tied to this student or teacher
+        if (students.length > 0) {
+            await mysql.query(
+                'DELETE FROM Implementations WHERE requested_by = ?',
+                [students[0].studentID]
+            );
+        }
+        if (teachers.length > 0) {
+            await mysql.query(
+                'DELETE FROM Implementations WHERE teacherID = ?',
+                [teachers[0].teacherID]
+            );
+        }
+
+        // Then delete from Students or Teachers
+        await mysql.query('DELETE FROM Students WHERE userID = ?', [id]);
+        await mysql.query('DELETE FROM Teachers WHERE userID = ?', [id]);
+
+        // Finally delete from Users
+        await mysql.query('DELETE FROM Users WHERE userID = ?', [id]);
+
+        res.json({ message: 'User deleted successfully.' });
+    } catch (err) {
+        console.error('Delete user error:', err);
+        res.status(500).json({ message: 'Failed to delete user: ' + err.message });
     }
 });
 
