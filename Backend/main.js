@@ -193,6 +193,30 @@ app.post('/requests', async (req, res) => {
     }
 });
 
+// ─── GET ALL USERS (for userlist.html) ───────────────────────────────────────
+
+app.get('/admin/users', async (req, res) => {
+    try {
+        const [users] = await mysql.query(`
+            SELECT
+                u.userID,
+                u.fullname,
+                u.email,
+                u.account_created,
+                s.studentID,
+                t.teacherID
+            FROM Users u
+            LEFT JOIN Students s ON u.userID = s.userID
+            LEFT JOIN Teachers t ON u.userID = t.userID
+            ORDER BY u.account_created DESC
+        `);
+        res.json(users);
+    } catch (err) {
+        console.error('Get users error:', err);
+        res.status(500).json({ message: 'Failed to load users.' });
+    }
+});
+
 // 404 handler
 app.use((req, res) => {
     res.status(404).sendFile(path.join(__dirname, '..', 'Frontend', '404.html'));
