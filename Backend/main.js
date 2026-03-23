@@ -1,16 +1,18 @@
 const express = require('express');
 const session = require('express-session');
 const bcrypt  = require('bcrypt');
-const reservationsRoutes = require('./reservations.js');
+const mysql = require('mysql2');
 require('dotenv').config();
 
-const mysql = require('mysql2').createPool({
+const pool = mysql.createPool({
     host:     process.env.DB_HOST,
     port:     process.env.DB_PORT,
     user:     process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME
 }).promise();
+
+const reservationsRoutes = require('./reservations.js')(pool);
 
 console.log('DB_USER:', process.env.DB_USER);
 console.log('DB_PASSWORD:', process.env.DB_PASSWORD ? '***' : '(empty)');
@@ -33,13 +35,13 @@ app.use(reservationsRoutes);
 // Create tables on startup
 async function initDB() {
     try {
-        await mysql.query(`
+        await pool.query(`
             CREATE TABLE IF NOT EXISTS reservations (
                 room_name TEXT NOT NULL,
                 time      TEXT NOT NULL
             )
         `);
-        await mysql.query(`
+        await pool.query(`
             CREATE TABLE IF NOT EXISTS users (
                 firstname TEXT NOT NULL,
                 lastname  TEXT NOT NULL,
@@ -59,7 +61,7 @@ app.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
     try {
-        const [rows] = await mysql.query(
+        const [rows] = await pool.query(
             'SELECT * FROM Users WHERE email = ?', [email]
         );
 
@@ -74,10 +76,10 @@ app.post('/login', async (req, res) => {
             return res.status(401).json({ message: 'Invalid email or password.' });
         }
 
-        const [students] = await mysql.query(
+        const [students] = await pool.query(
             'SELECT studentID FROM Students WHERE userID = ?', [user.userID]
         );
-        const [teachers] = await mysql.query(
+        const [teachers] = await pool.query(
             'SELECT teacherID FROM Teachers WHERE userID = ?', [user.userID]
         );
 
@@ -114,7 +116,7 @@ app.post('/register/student', async (req, res) => {
     const { firstname, lastname, phone, email, password } = req.body;
 
     try {
-        const [existing] = await mysql.query(
+        const [existing] = await pool.query(
             'SELECT userID FROM Users WHERE email = ?', [email]
         );
         if (existing.length > 0) {
@@ -123,17 +125,17 @@ app.post('/register/student', async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        const [userResult] = await mysql.query(
+        const [userResult] = await pool.query(
             'INSERT INTO Users (fullname, email, password, account_created) VALUES (?, ?, ?, NOW())',
             [`${firstname} ${lastname}`, email, hashedPassword]
         );
         const userID = userResult.insertId;
 
-        const [countResult] = await mysql.query('SELECT COUNT(*) AS count FROM Students');
+        const [countResult] = await pool.query('SELECT COUNT(*) AS count FROM Students');
         const nextNum   = countResult[0].count + 1;
         const studentID = `2026${String(nextNum).padStart(3, '0')}-S`;
 
-        await mysql.query(
+        await pool.query(
             'INSERT INTO Students (studentID, firstname, lastname, phone, userID) VALUES (?, ?, ?, ?, ?)',
             [studentID, firstname, lastname, phone, userID]
         );
@@ -152,7 +154,7 @@ app.post('/register/teacher', async (req, res) => {
     const { firstname, lastname, phone, email, password } = req.body;
 
     try {
-        const [existing] = await mysql.query(
+        const [existing] = await pool.query(
             'SELECT userID FROM Users WHERE email = ?', [email]
         );
         if (existing.length > 0) {
@@ -161,17 +163,17 @@ app.post('/register/teacher', async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        const [userResult] = await mysql.query(
+        const [userResult] = await pool.query(
             'INSERT INTO Users (fullname, email, password, account_created) VALUES (?, ?, ?, NOW())',
             [`${firstname} ${lastname}`, email, hashedPassword]
         );
         const userID = userResult.insertId;
 
-        const [countResult] = await mysql.query('SELECT COUNT(*) AS count FROM Teachers');
+        const [countResult] = await pool.query('SELECT COUNT(*) AS count FROM Teachers');
         const nextNum   = countResult[0].count + 1;
         const teacherID = String(nextNum).padStart(3, '0');
 
-        await mysql.query(
+        await pool.query(
             'INSERT INTO Teachers (teacherID, firstname, lastname, phone, userID) VALUES (?, ?, ?, ?, ?)',
             [teacherID, firstname, lastname, phone, userID]
         );
@@ -188,7 +190,7 @@ app.post('/register/teacher', async (req, res) => {
 
 app.get('/schedule/courses', async (req, res) => {
     try {
-        const [courses] = await mysql.query(
+        const [courses] = await pool.query(
             'SELECT courseID, name, description FROM Courses'
         );
         res.json(courses);
@@ -208,7 +210,7 @@ app.get('/schedule/available-rooms', async (req, res) => {
     }
 
     try {
-        const [rooms] = await mysql.query(`
+        const [rooms] = await pool.query(`
             SELECT c.classroomID, c.name, c.category, c.description, c.BYOD
             FROM Classrooms c
             WHERE c.is_available = 1
@@ -238,7 +240,7 @@ app.post('/requests', async (req, res) => {
     }
 
     try {
-        const [conflicts] = await mysql.query(`
+        const [conflicts] = await pool.query(`
             SELECT implementationID FROM Implementations
             WHERE classroomID = ?
             AND status IN ('Pending', 'Approved')
@@ -250,7 +252,7 @@ app.post('/requests', async (req, res) => {
             return res.status(409).json({ message: 'Room is already taken for that time slot.' });
         }
 
-        await mysql.query(`
+        await pool.query(`
             INSERT INTO Implementations
                 (courseID, is_onlineclass, starttime, endtime, teacherID, classroomID, status, requested_by)
             VALUES (?, 0, ?, ?, NULL, ?, 'Pending', ?)
@@ -268,7 +270,7 @@ app.post('/requests', async (req, res) => {
 
 app.get('/admin/users', async (req, res) => {
     try {
-        const [users] = await mysql.query(`
+        const [users] = await pool.query(`
             SELECT
                 u.userID,
                 u.fullname,
@@ -300,33 +302,33 @@ app.delete('/admin/users/:id', async (req, res) => {
 
     try {
         // Get studentID and teacherID first
-        const [students] = await mysql.query(
+        const [students] = await pool.query(
             'SELECT studentID FROM Students WHERE userID = ?', [id]
         );
-        const [teachers] = await mysql.query(
+        const [teachers] = await pool.query(
             'SELECT teacherID FROM Teachers WHERE userID = ?', [id]
         );
 
         // Delete Implementations tied to this student or teacher
         if (students.length > 0) {
-            await mysql.query(
+            await pool.query(
                 'DELETE FROM Implementations WHERE requested_by = ?',
                 [students[0].studentID]
             );
         }
         if (teachers.length > 0) {
-            await mysql.query(
+            await pool.query(
                 'DELETE FROM Implementations WHERE teacherID = ?',
                 [teachers[0].teacherID]
             );
         }
 
         // Then delete from Students or Teachers
-        await mysql.query('DELETE FROM Students WHERE userID = ?', [id]);
-        await mysql.query('DELETE FROM Teachers WHERE userID = ?', [id]);
+        await pool.query('DELETE FROM Students WHERE userID = ?', [id]);
+        await pool.query('DELETE FROM Teachers WHERE userID = ?', [id]);
 
         // Finally delete from Users
-        await mysql.query('DELETE FROM Users WHERE userID = ?', [id]);
+        await pool.query('DELETE FROM Users WHERE userID = ?', [id]);
 
         res.json({ message: 'User deleted successfully.' });
     } catch (err) {

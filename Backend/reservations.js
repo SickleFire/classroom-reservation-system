@@ -1,11 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
-//const db = require('pool');
+
+module.exports = function(pool) {
+  const router = express.Router();
 
 router.get('/reserve-events', async (req, res) => {
     try {
-        const [rows] = await db.query('SELECT room_name, time FROM reservations');
+        const [rows] = await pool.query('SELECT room_name, time FROM reservations');
         const events = rows.map(r => ({
             title: `Room ${r.room_name}`,
             start: r.time   // must be in ISO format (YYYY-MM-DD HH:MM)
@@ -32,8 +34,16 @@ router.post('/reserve', async (req, res) => {
 
 router.get('/reservations', async (req, res) => {
     try {
-    const [rows] = await db.query(
-      'SELECT reservationID, room, userName, start_time, end_time, status, created_at FROM reservations'
+    const [rows] = await pool.query(
+      `SELECT 
+         implementationID, 
+         courseID, 
+         is_onlineclass, 
+         starttime, 
+         endtime, 
+         teacherID, 
+         classroomID 
+       FROM implementations`
     );
     res.json(rows);
   } catch (err) {
@@ -43,4 +53,6 @@ router.get('/reservations', async (req, res) => {
 
 })
 
-module.exports = router;
+return router;
+
+};
