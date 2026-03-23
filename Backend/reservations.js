@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
-const db = require('pool');
+//const db = require('pool');
 
 router.get('/reserve-events', async (req, res) => {
     try {
