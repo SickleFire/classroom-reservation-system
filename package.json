@@ -1,7 +1,7 @@
 {
   "name": "classroom-reservation-system",
   "version": "1.0.0",
-  "description": "",
+  "description": "v24.14.0 node version\r 11.9.0 npm version",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
