@@ -13,7 +13,7 @@
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        color: #FFFFFF;
+        color: #F8F5F0;
         position: relative;
         padding: 20px;
         background: url("croom.jpg") center / cover no-repeat;
@@ -22,7 +22,7 @@
         content: "";
         position: absolute;
         inset: 0;
-        background: #171717d0;
+        background: #1E1E1ED9;
         z-index: 0;
     }
     body > * { position: relative; z-index: 1; }
@@ -38,12 +38,16 @@
         color: #FFFFFF;
         cursor: pointer;
         font-weight: bold;
+        transition: background-color 0.3s ease;
+    }
+    .bckbtn:hover {
+        background-color: #232323;
     }
     .container {
         width: 100%;
         max-width: 450px;
         padding: 25px;
-        background: #ffffff1a; 
+        background: #F5F2ED26; 
         border-radius: 12px;
         box-shadow: 0 6px 15px #00000080;
         backdrop-filter: blur(10px);
@@ -51,7 +55,7 @@
         flex-direction: column;
         align-items: center;
     }
-    label { width: 100%; max-width: 400px; margin-bottom: 5px; font-weight: bold; }
+    label { width: 100%; max-width: 400px; margin-bottom: 5px; font-weight: bold; color: #F8F5F0; }
     input, select {
         width: 100%;
         max-width: 400px;
@@ -60,6 +64,8 @@
         border: none;
         border-radius: 6px;
         font-size: 16px;
+        background-color: #FFFDF9;
+        color: #222222;
     }
     button {
         padding: 10px 16px;
@@ -72,10 +78,14 @@
         cursor: pointer;
         font-weight: bold;
         width: 40%;
+        transition: background-color 0.3s ease;
+    }
+    button:hover {
+        background-color: #232323;
     }
     #roomDetails, #summary, #message { width: 100%; max-width: 400px; margin-bottom: 15px; }
-    #summary { display: none; background-color: #FFFFFF1F; padding: 15px; border-radius: 10px; }
-    #roomDetails { display: none; background-color: #FFFFFF14; padding: 15px; border-radius: 10px; }
+    #summary { display: none; background-color: #FFFFFF24; padding: 15px; border-radius: 10px; color: #F8F5F0; }
+    #roomDetails { display: none; background-color: #FFFFFF1A; padding: 15px; border-radius: 10px; color: #F8F5F0; }
 </style>
 </head>
 <body>
