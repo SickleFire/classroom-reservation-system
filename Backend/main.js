@@ -20,6 +20,11 @@ console.log('DB_PASSWORD:', process.env.DB_PASSWORD ? '***' : '(empty)');
 const path = require('path');
 const app  = express();
 
+app.get('/dashboard.html', requireLogin, (req, res) => {
+    print("Dashboard");
+  res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
+});
+
 // Serve static HTML files from Frontend folder
 app.use(express.static(path.join(__dirname, '..', 'Frontend')));
 
@@ -31,6 +36,13 @@ app.use(express.json());
 
 // Reservations routes
 app.use(reservationsRoutes);
+
+app.use(session({
+  secret: 'your-secret-key',   // change this
+  resave: false,
+  saveUninitialized: false,
+  cookie: { secure: false }    // set secure:true if using HTTPS
+}));
 
 // Create tables on startup
 async function initDB() {
@@ -95,13 +107,21 @@ app.post('/login', async (req, res) => {
             teacherID = teachers[0].teacherID;
         }
 
+        req.session.user = {
+            id: user.userID,
+            fullname: user.fullname,
+            role,
+            studentID,
+            teacherID
+        };
+
         res.json({
             message:  'Login successful!',
             role,
             fullname:  user.fullname,
             studentID,
             teacherID,
-            redirect: 'dashboard.html'
+            redirect: '/dashboard.html'
         });
 
     } catch (err) {
@@ -337,12 +357,28 @@ app.delete('/admin/users/:id', async (req, res) => {
     }
 });
 
+app.get('/logout', (req, res) => {
+  req.session.destroy(err => {
+    if (err) {
+      console.error('Logout error:', err);
+      return res.status(500).send('Failed to logout');
+    }
+    res.clearCookie('connect.sid'); // clear the session cookie
+    res.redirect('/index.html');    // or send JSON if you prefer
+  });
+});
+
+function requireLogin(req, res, next) {
+  if (!req.session || !req.session.user) {
+    return res.redirect('/index.html'); // redirect to login if not logged in
+  }
+  next();
+}
+
 // 404 handler
 app.use((req, res) => {
     res.status(404).sendFile(path.join(__dirname, '..', 'Frontend', '404.html'));
 });
-
-app.use(reservationsRoutes);
  
 // Start server on port 7878
 initDB().then(() => {
