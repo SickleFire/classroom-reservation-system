@@ -9,9 +9,6 @@
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-    }
-
-    html {
       scroll-behavior: smooth;
     }
 
@@ -46,7 +43,6 @@
       text-transform: uppercase;
       font-family: Arial, sans-serif;
       letter-spacing: 1px;
-      transition: color 0.3s ease;
     }
 
     nav a:hover {
@@ -113,18 +109,17 @@
       border-radius: 30px;
       text-decoration: none;
       font-size: 18px;
-      transition: background 0.3s ease, transform 0.3s ease;
+      transition: 0.3s ease;
     }
 
     .reserve-btn:hover {
       background: #e6dccd;
-      transform: scale(1.05);
     }
 
     .features {
       display: flex;
       justify-content: center;
-      align-items: stretch;
+      align-items: center;
       gap: 40px;
       padding: 60px 70px;
       background: #efefef;
@@ -133,19 +128,7 @@
 
     .feature {
       flex: 1;
-      max-width: 500px;
-      border: 2px solid #d8c59f;
-      border-radius: 18px;
-      padding: 30px 25px;
-      background: #ffffff;
-      max-height: 500px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .feature:hover {
-      transform: translateY(-8px);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+      max-width: 400px;
     }
 
     .feature .icon {
@@ -239,11 +222,7 @@
 
       .features {
         flex-direction: column;
-        align-items: center;
-      }
-
-      .feature {
-        max-width: 90%;
+    
       }
 
       .steps {
@@ -361,48 +340,48 @@
       <div class="steps">
 
         <div class="step">
-          <h3>1. User enters the Login/Sign Up page.</h3>
+          <h3>1. User enters the Login/Sign Up page. </h3>
           <p>The user chooses whether to log in or sign up as a Student or Teacher/Admin.</p>
         </div>
 
         <div class="step">
           <h3>2. The system identifies the user role.</h3>
-          <p>After logging in, the system checks if the user is a student, teacher, or admin.</p>
+          <p> After logging in, the system checks if the user is a student, teacher, or admin.</p>
         </div>
 
         <div class="step">
           <h3>3. The correct dashboard appears.</h3>
-          <p>The dashboard shown depends on who logged in. The name of the logged-in user will also appear.</p>
+          <p> The dashboard shown depends on who logged in. The name of the logged-in user will also appear.</p>
         </div>
 
         <div class="step">
           <h3>4. Students can request classroom bookings.</h3>
-          <p>If the user is a student, they can only view the schedule on the main dashboard and send a classroom reservation request.</p>
+          <p> If the user is a student, they can only view the schedule on the main dashboard and send a classroom reservation request.</p>
         </div>
 
         <div class="step">
           <h3>5. Teachers and admins can approve reservations.</h3>
-          <p>If the user is a teacher or admin, they can view the schedule on the main dashboard and approve or manage classroom reservation requests.</p>
+          <p> If the user is a teacher or admin, they can view the schedule on the main dashboard and approve or manage classroom reservation requests.</p>
         </div>
 
         <div class="step">
           <h3>6. Only admins can view the user list.</h3>
-          <p>The user list is only visible to the admin. Teachers and students cannot access it.</p>
+          <p> The user list is only visible to the admin. Teachers and students cannot access it.</p>
         </div>
 
         <div class="step">
           <h3>7. The schedule is shown on the main dashboard.</h3>
-          <p>Both teachers and students can see the classroom schedule on the dashboard to check room availability.</p>
+          <p> Both teachers and students can see the classroom schedule on the dashboard to check room availability.</p>
         </div>
 
         <div class="step">
           <h3>8. Approved requests are added to the schedule.</h3>
-          <p>Once a reservation request is approved, it becomes part of the official classroom schedule.</p>
+          <p> Once a reservation request is approved, it becomes part of the official classroom schedule.</p>
         </div>
 
         <div class="step">
           <h3>9. The system helps avoid conflicts.</h3>
-          <p>Because all bookings are recorded in one system, it helps prevent overlapping schedules and double booking.</p>
+          <p> Because all bookings are recorded in one system, it helps prevent overlapping schedules and double booking.</p>
         </div>
 
       </div>

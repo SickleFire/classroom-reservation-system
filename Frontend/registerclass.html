@@ -5,7 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Register Class</title>
 <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
     body {
         min-height: 100vh;
         font-family: 'Montserrat', sans-serif;
@@ -18,6 +23,7 @@
         padding: 20px;
         background: url("croom.jpg") center / cover no-repeat;
     }
+
     body::before {
         content: "";
         position: absolute;
@@ -25,7 +31,12 @@
         background: #171717d0;
         z-index: 0;
     }
-    body > * { position: relative; z-index: 1; }
+
+    body > * {
+        position: relative;
+        z-index: 1;
+    }
+
     .bckbtn {
         align-self: flex-start;
         width: 100px;
@@ -39,6 +50,12 @@
         cursor: pointer;
         font-weight: bold;
     }
+
+    .bckbtn:hover {
+        background-color: #FFFFFF;
+        color: #000000;
+    }
+
     .container {
         width: 100%;
         max-width: 450px;
@@ -47,12 +64,26 @@
         border-radius: 12px;
         box-shadow: 0 6px 15px #00000080;
         backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
         display: flex;
         flex-direction: column;
         align-items: center;
     }
-    label { width: 100%; max-width: 400px; margin-bottom: 5px; font-weight: bold; }
-    input, select {
+
+    h2 {
+        margin-bottom: 20px;
+    }
+
+    label {
+        width: 100%;
+        max-width: 400px;
+        margin-bottom: 5px;
+        font-weight: bold;
+        color: #FFFFFF;
+    }
+
+    input,
+    select {
         width: 100%;
         max-width: 400px;
         padding: 10px;
@@ -60,7 +91,10 @@
         border: none;
         border-radius: 6px;
         font-size: 16px;
+        background-color: #FFFFFF;
+        color: #000000;
     }
+
     button {
         padding: 10px 16px;
         margin-bottom: 15px;
@@ -73,9 +107,42 @@
         font-weight: bold;
         width: 40%;
     }
-    #roomDetails, #summary, #message { width: 100%; max-width: 400px; margin-bottom: 15px; }
-    #summary { display: none; background-color: #FFFFFF1F; padding: 15px; border-radius: 10px; }
-    #roomDetails { display: none; background-color: #FFFFFF14; padding: 15px; border-radius: 10px; }
+
+    button:hover {
+        background-color: #FFFFFF;
+        color: #000000;
+    }
+
+    #roomDetails,
+    #summary,
+    #message {
+        width: 100%;
+        max-width: 400px;
+        margin-bottom: 15px;
+        text-align: left;
+    }
+
+    #summary {
+        display: none;
+        background-color: #FFFFFF1F;
+        border: 1px solid #FFFFFF33;
+        border-radius: 10px;
+        padding: 15px;
+        backdrop-filter: blur(6px);
+        box-shadow: 0 4px 10px #00000033;
+    }
+
+    #roomDetails {
+        display: none;
+        background-color: #FFFFFF14;
+        border-radius: 10px;
+        padding: 15px;
+    }
+
+    #message {
+        font-weight: bold;
+        color: #FF0000;
+    }
 </style>
 </head>
 <body>
@@ -115,7 +182,7 @@
             <strong>Room Details:</strong><br>
             <span id="roomName"></span><br>
             <span id="roomID"></span><br>
-            <span id="roomCategory"></span>
+            <span id="roomCategory"></span><br>
         </div>
 
         <div id="summary">
@@ -172,13 +239,15 @@
         const selectedOpt = startSelect.selectedOptions[0];
         endSelect.innerHTML = '<option value="">-- Select End Time --</option>';
         document.getElementById('classroomID').innerHTML = '<option value="">-- Pick date and time first --</option>';
-        
+        document.getElementById('roomDetails').style.display = 'none';
+        document.getElementById('summary').style.display = 'none';
+
         if (!selectedOpt || !selectedOpt.value) return;
 
         const startHour = parseInt(selectedOpt.dataset.hour);
         const startMin = parseInt(selectedOpt.dataset.min);
         const startMins = toMinutes(startHour, startMin);
-        const maxMins = startMins + 180;
+        const maxMins = startMins + 180; // 3 hours
 
         allSlots.forEach(slot => {
             const slotMins = toMinutes(slot.hour, slot.min);
@@ -193,15 +262,6 @@
         });
     }
 
-    function buildDatetime() {
-        const date = document.getElementById('date').value;
-        const start = document.getElementById('starttime').value;
-        const end = document.getElementById('endtime').value;
-        if (date && start) startDatetime = `${date} ${start}:00`;
-        if (date && end) endDatetime = `${date} ${end}:00`;
-    }
-
-    /* Database Fetch Logic */
     async function loadCourses() {
         try {
             const res = await fetch('/schedule/courses');
@@ -216,6 +276,19 @@
         } catch (err) { console.error(err); }
     }
 
+    window.onload = () => {
+        generateStartTimes();
+        loadCourses();
+    };
+
+    function buildDatetime() {
+        const date = document.getElementById('date').value;
+        const start = document.getElementById('starttime').value;
+        const end = document.getElementById('endtime').value;
+        if (date && start) startDatetime = `${date} ${start}:00`;
+        if (date && end) endDatetime = `${date} ${end}:00`;
+    }
+
     async function loadRooms() {
         buildDatetime();
         if (!startDatetime || !endDatetime) return;
@@ -224,6 +297,10 @@
             availableRooms = await res.json();
             const dropdown = document.getElementById('classroomID');
             dropdown.innerHTML = '<option value="">-- Select a Room --</option>';
+            if (availableRooms.length === 0) {
+                dropdown.innerHTML = '<option value="">No rooms available for this time</option>';
+                return;
+            }
             availableRooms.forEach(r => {
                 const opt = document.createElement('option');
                 opt.value = r.classroomID;
@@ -242,53 +319,65 @@
         document.getElementById('roomID').textContent = `Room ID: ${room.classroomID}`;
         document.getElementById('roomCategory').textContent = `Category: ${room.category}`;
 
+        const courseName = document.getElementById('courseID').selectedOptions[0].text;
+        const studentID = document.getElementById('studentID').value;
+        const startLabel = document.getElementById('starttime').selectedOptions[0].text;
+        const date = document.getElementById('date').value;
+        const endLabel = document.getElementById('endtime').selectedOptions[0].text;
+
         document.getElementById('summary').style.display = 'block';
         document.getElementById('summaryText').innerHTML = `
-            Student ID: ${document.getElementById('studentID').value}<br>
-            Course: ${document.getElementById('courseID').selectedOptions[0].text}<br>
-            Time: ${document.getElementById('starttime').value} - ${document.getElementById('endtime').value}
+            Student ID: ${studentID}<br>
+            Course: ${courseName}<br>
+            Date: ${date}<br>
+            Start: ${startLabel}<br>
+            End: ${endLabel}<br>
+            Room: ${room.name} (ID: ${room.classroomID})<br>
+            Category: ${room.category}
         `;
     }
 
     async function submitClass() {
-    buildDatetime();
-    const messageEl = document.getElementById('message');
-    
-    const data = {
-        studentID: document.getElementById('studentID').value,
-        courseID: document.getElementById('courseID').value,
-        classroomID: document.getElementById('classroomID').value,
-        starttime: startDatetime,
-        endtime: endDatetime
-    };
+        const studentID = document.getElementById('studentID').value;
+        const courseID = document.getElementById('courseID').value;
+        const classroomID = document.getElementById('classroomID').value;
 
-    try {
-        const res = await fetch('/requests', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        });
-        
-        const result = await res.json();
-        
-        // Indicate failure with red color if status isn't 200 (OK)
-        if (!res.ok) {
-            messageEl.style.color = "#ff4444"; 
-        } else {
-            messageEl.style.color = "#44ff44";
+        if (!studentID || !courseID || !classroomID || !startDatetime || !endDatetime) {
+            document.getElementById('message').textContent = 'Please fill in all fields.';
+            return;
         }
-        
-        messageEl.textContent = result.message;
-        
-    } catch (err) { 
-        messageEl.style.color = "#ff4444";
-        messageEl.textContent = 'Error: Could not connect to server.'; 
+
+        const data = { studentID, courseID, classroomID, starttime: startDatetime, endtime: endDatetime };
+
+        try {
+            const res = await fetch('/requests', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const result = await res.json();
+            document.getElementById('message').textContent = result.message;
+            document.getElementById('summary').style.display = 'none';
+            document.getElementById('roomDetails').style.display = 'none';
+        } catch (err) {
+            document.getElementById('message').textContent = 'Submission failed. Please try again.';
+        }
     }
-}
 
-    function resetForm() { location.reload(); }
-
-    window.onload = () => { generateStartTimes(); loadCourses(); };
+    function resetForm() {
+        document.getElementById('studentID').value = '';
+        document.getElementById('courseID').value = '';
+        document.getElementById('date').value = '';
+        document.getElementById('starttime').value = '';
+        document.getElementById('endtime').innerHTML = '<option value="">-- Select Start Time first --</option>';
+        document.getElementById('classroomID').innerHTML = '<option value="">-- Pick date and time first --</option>';
+        document.getElementById('roomDetails').style.display = 'none';
+        document.getElementById('summary').style.display = 'none';
+        document.getElementById('message').textContent = '';
+        startDatetime = '';
+        endDatetime = '';
+    }
 </script>
+
 </body>
 </html>
