@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reservation List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            padding: 2rem;
+            margin: 0;
+        }
+        h2 { color: #333; margin-bottom: 1rem; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        th, td {
+            border: 1px solid #dee2e6;
+            padding: 10px 14px;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+        th {
+            background: #343a40;
+            color: #fff;
+            font-weight: bold;
+        }
+        tr:nth-child(even) { background: #f8f9fa; }
+        tr:hover { background: #e9ecef; }
+        .status-active { color: #28a745; font-weight: bold; }
+        .status-cancelled { color: #dc3545; font-weight: bold; }
+        .pagination {
+            margin-top: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .pagination button {
+            padding: 6px 12px;
+            border: 1px solid #ccc;
+            background: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+        .pagination button:hover { background: #e9ecef; }
+        .pagination button.active {
+            background: #343a40;
+            color: #fff;
+            border-color: #343a40;
+            font-weight: bold;
+        }
+        .pagination button:disabled {
+            opacity: 0.4;
+            cursor: default;
+        }
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .btn-back {
+            padding: 0.5rem 1rem;
+            background: #6c757d;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        .btn-back:hover { background: #545b62; }
+        .btn-cancel {
+            padding: 4px 10px;
+            background: #dc3545;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        .btn-cancel:hover { background: #b02a37; }
+        .message { margin-top: 1rem; }
+    </style>
+</head>
+<body>
+
+    <div class="top-bar">
+        <h2>Reservation List</h2>
+        <button class="btn-back" onclick="window.location.href='dashboard.html'">← Back</button>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Reservation ID</th>
+                <th>Room</th>
+                <th>User</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th>Status</th>
+                <th>Created At</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="reservationTableBody">
+            <tr><td colspan="8">Loading reservations...</td></tr>
+        </tbody>
+    </table>
+
+    <div class="pagination" id="pagination"></div>
+    <p class="message" id="message"></p>
+
+    <script>
+        let allReservations = [];
+        let currentPage = 1;
+        const perPage = 20;
+
+        async function loadReservations() {
+            try {
+                const res = await fetch('/reservations');
+                allReservations = await res.json();
+                currentPage = 1;
+                renderTable();
+                renderPagination();
+            } catch (err) {
+                document.getElementById('message').textContent = 'Failed to load reservations.';
+                console.error('Load reservations error:', err);
+            }
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('reservationTableBody');
+            const start = (currentPage - 1) * perPage;
+            const end = start + perPage;
+            const subset = allReservations.slice(start, end);
+
+            if (subset.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8">No reservations found.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = '';
+            subset.forEach(r => {
+                const statusClass = r.status === 'Active' ? 'status-active' : 'status-cancelled';
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${r.reservationID}</td>
+                        <td>${r.room}</td>
+                        <td>${r.userName || '-'}</td>
+                        <td>${new Date(r.start_time).toLocaleString()}</td>
+                        <td>${new Date(r.end_time).toLocaleString()}</td>
+                        <td class="${statusClass}">${r.status}</td>
+                        <td>${new Date(r.created_at).toLocaleString()}</td>
+                        <td>
+                            ${r.status === 'Active' ? 
+                                `<button class="btn-cancel" onclick="cancelReservation(${r.reservationID})">Cancel</button>` 
+                                : '-'}
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        async function cancelReservation(reservationID) {
+            if (!confirm(`Cancel reservation #${reservationID}?`)) return;
+
+            try {
+                const res = await fetch(`/admin/reservations/${reservationID}`, { method: 'DELETE' });
+                const result = await res.json();
+
+                if (res.ok) {
+                    document.getElementById('message').style.color = '#28a745';
+                    document.getElementById('message').textContent = result.message;
+                    loadReservations();
+                } else {
+                    document.getElementById('message').style.color = '#dc3545';
+                    document.getElementById('message').textContent = result.message;
+                }
+            } catch (err) {
+                document.getElementById('message').textContent = 'Failed to cancel reservation.';
+                console.error('Cancel reservation error:', err);
+            }
+        }
+
+        function renderPagination() {
+            const totalPages = Math.ceil(allReservations.length / perPage);
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+
+            if (totalPages <= 1) return;
+
+            const prevBtn = document.createElement('button');
+            prevBtn.textContent = '‹';
+            prevBtn.disabled = currentPage === 1;
+            prevBtn.onclick = () => goToPage(currentPage - 1);
+            pagination.appendChild(prevBtn);
+
+            for (let i = 1; i <= totalPages; i++) {
+                const btn = document.createElement('button');
+                btn.textContent = i;
+                if (i === currentPage) btn.classList.add('active');
+                btn.onclick = () => goToPage(i);
+                pagination.appendChild(btn);
+            }
+
+            const nextBtn = document.createElement('button');
+            nextBtn.textContent = '›';
+            nextBtn.disabled = currentPage === totalPages;
+            nextBtn.onclick = () => goToPage(currentPage + 1);
+            pagination.appendChild(nextBtn);
+        }
+
+        function goToPage(page) {
+            const totalPages = Math.ceil(allReservations.length / perPage);
+            if (page < 1 || page > totalPages) return;
+            currentPage = page;
+            renderTable();
+            renderPagination();
+        }
+
+        window.onload = loadReservations;
+    </script>
+
+</body>
+</html>

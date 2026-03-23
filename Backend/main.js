@@ -12,6 +12,9 @@ const mysql = require('mysql2').createPool({
     database: process.env.DB_NAME
 }).promise();
 
+console.log('DB_USER:', process.env.DB_USER);
+console.log('DB_PASSWORD:', process.env.DB_PASSWORD ? '***' : '(empty)');
+
 const path = require('path');
 const app  = express();
 
