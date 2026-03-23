@@ -251,40 +251,24 @@
     }
 
     async function submitClass() {
-    buildDatetime();
-    const messageEl = document.getElementById('message');
-    
-    const data = {
-        studentID: document.getElementById('studentID').value,
-        courseID: document.getElementById('courseID').value,
-        classroomID: document.getElementById('classroomID').value,
-        starttime: startDatetime,
-        endtime: endDatetime
-    };
-
-    try {
-        const res = await fetch('/requests', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        });
-        
-        const result = await res.json();
-        
-        // Indicate failure with red color if status isn't 200 (OK)
-        if (!res.ok) {
-            messageEl.style.color = "#ff4444"; 
-        } else {
-            messageEl.style.color = "#44ff44";
-        }
-        
-        messageEl.textContent = result.message;
-        
-    } catch (err) { 
-        messageEl.style.color = "#ff4444";
-        messageEl.textContent = 'Error: Could not connect to server.'; 
+        buildDatetime();
+        const data = {
+            studentID: document.getElementById('studentID').value,
+            courseID: document.getElementById('courseID').value,
+            classroomID: document.getElementById('classroomID').value,
+            starttime: startDatetime,
+            endtime: endDatetime
+        };
+        try {
+            const res = await fetch('/requests', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const result = await res.json();
+            document.getElementById('message').textContent = result.message;
+        } catch (err) { document.getElementById('message').textContent = 'Error submitting.'; }
     }
-}
 
     function resetForm() { location.reload(); }
 

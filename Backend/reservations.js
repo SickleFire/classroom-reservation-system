@@ -32,23 +32,17 @@ router.post('/reserve', async (req, res) => {
 
 });
 
-router.get('/reservations', async (req, res) => {
+router.get('/reservations', async (req, result) => {
     try {
-    const [rows] = await pool.query(
-      `SELECT 
-         implementationID, 
-         courseID, 
-         is_onlineclass, 
-         starttime, 
-         endtime, 
-         teacherID, 
-         classroomID 
-       FROM implementations`
-    );
-    res.json(rows);
+    const res = await fetch('http://127.0.0.1:8080/get-reservations-list');
+    if (!res.ok) throw new Error('Failed to fetch reservations');
+    const reservations = await res.json();
+
+    console.log('Reservations from Rust:', reservations);
+    // You can now render them in your table
+    result.json(reservations);
   } catch (err) {
-    console.error('Error fetching reservations:', err);
-    res.status(500).json({ message: 'Failed to fetch reservations' });
+    console.error('Error calling Rust service:', err);
   }
 
 })
