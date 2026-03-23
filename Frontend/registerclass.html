@@ -130,6 +130,7 @@
     </div>
 
 <script>
+    /* Your Original Logic - Restored */
     let availableRooms = [];
     let startDatetime = '';
     let endDatetime = '';
@@ -201,7 +202,6 @@
         if (date && end) endDatetime = `${date} ${end}:00`;
     }
 
-    /* Database Fetch Logic */
     async function loadCourses() {
         try {
             const res = await fetch('/schedule/courses');

@@ -220,14 +220,10 @@ app.get('/schedule/courses', async (req, res) => {
     }
 });
 
-// ─── GET AVAILABLE ROOMS (with Debugging) ───────────────────
+// ─── GET AVAILABLE ROOMS (for registerclass.html dropdown) ───────────────────
 
 app.get('/schedule/available-rooms', async (req, res) => {
     const { starttime, endtime } = req.query;
-
-    // DEBUG: See what times the frontend is checking for
-    console.log(`--- DEBUG: Checking Availability ---`);
-    console.log(`Requested Range: ${starttime} to ${endtime}`);
 
     if (!starttime || !endtime) {
         return res.status(400).json({ message: 'Start time and end time are required.' });
@@ -242,75 +238,51 @@ app.get('/schedule/available-rooms', async (req, res) => {
                 SELECT i.classroomID
                 FROM Implementations i
                 WHERE i.status IN ('Pending', 'Approved')
-                AND NOT (i.endtime <= ? OR i.starttime >= ?)
+                AND i.starttime < ?
+                AND i.endtime   > ?
             )
-        `, [starttime, endtime]);
+        `, [endtime, starttime]);
 
-        console.log(`DEBUG: Found ${rooms.length} available rooms.`);
         res.json(rooms);
-
     } catch (err) {
         console.error('Available rooms error:', err);
         res.status(500).json({ message: 'Failed to fetch available rooms.' });
     }
 });
 
-// ─── POST REQUESTS (Student & Room Validation) ─────────────────────────────
+// ─── POST REQUESTS (student submits room request) ─────────────────────────────
 
 app.post('/requests', async (req, res) => {
     const { studentID, courseID, classroomID, starttime, endtime } = req.body;
-
-    // DEBUG: Logs incoming data to your terminal
-    console.log("--- DEBUG: Incoming Booking Request ---");
-    console.log(`Student: ${studentID} | Room: ${classroomID} | Course: ${courseID}`);
-    console.log(`Time Slot: ${starttime} to ${endtime}`);
 
     if (!studentID || !courseID || !classroomID || !starttime || !endtime) {
         return res.status(400).json({ message: 'All fields are required.' });
     }
 
     try {
-        // 1. VALIDATION: Check if Student ID exists in the database
-        const [studentCheck] = await pool.query(
-            'SELECT studentID FROM Students WHERE studentID = ?', [studentID]
-        );
-
-        if (studentCheck.length === 0) {
-            console.log(`DEBUG: Validation Failed - Student ID "${studentID}" not found.`);
-            return res.status(404).json({ 
-                message: `Submission failed: Student ID "${studentID}" is not registered. The form will not be submitted.` 
-            });
-        }
-
-        // 2. VALIDATION: Check for Room Conflicts (Double Booking)
-        // This checks if any 'Pending' or 'Approved' session overlaps with the requested time
         const [conflicts] = await pool.query(`
             SELECT implementationID FROM Implementations
             WHERE classroomID = ?
             AND status IN ('Pending', 'Approved')
-            AND (starttime < ? AND endtime > ?)
+            AND starttime < ?
+            AND endtime   > ?
         `, [classroomID, endtime, starttime]);
 
         if (conflicts.length > 0) {
-            console.log(`DEBUG: Conflict Found - Room ${classroomID} is busy during this slot.`);
-            return res.status(409).json({ 
-                message: 'Submission failed: This room is already booked for the selected time. Please choose another room or time.' 
-            });
+            return res.status(409).json({ message: 'Room is already taken for that time slot.' });
         }
 
-        // 3. EXECUTION: If all checks pass, insert the record
         await pool.query(`
             INSERT INTO Implementations
                 (courseID, is_onlineclass, starttime, endtime, teacherID, classroomID, status, requested_by)
             VALUES (?, 0, ?, ?, NULL, ?, 'Pending', ?)
         `, [courseID, starttime, endtime, classroomID, studentID]);
 
-        console.log("DEBUG: Success - Request saved to Implementations table.");
-        res.json({ message: 'Room request submitted successfully! Waiting for admin approval.' });
+        res.json({ message: 'Room request submitted successfully! Waiting for approval.' });
 
     } catch (err) {
-        console.error('DATABASE ERROR:', err);
-        res.status(500).json({ message: 'Server Error: ' + err.message });
+        console.error('Request error:', err);
+        res.status(500).json({ message: 'Failed to submit request.' });
     }
 });
 
