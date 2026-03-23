@@ -4,6 +4,9 @@ const bcrypt  = require('bcrypt');
 const mysql = require('mysql2');
 require('dotenv').config();
 
+const path = require('path');
+const app  = express();
+
 const pool = mysql.createPool({
     host:     process.env.DB_HOST,
     port:     process.env.DB_PORT,
@@ -12,13 +15,38 @@ const pool = mysql.createPool({
     database: process.env.DB_NAME
 }).promise();
 
+app.use(session({
+  secret: '101',   // change this
+  resave: false,
+  saveUninitialized: false,
+  cookie: { secure: false }    // set secure:true if using HTTPS
+}));
+
 const reservationsRoutes = require('./reservations.js')(pool);
 
 console.log('DB_USER:', process.env.DB_USER);
 console.log('DB_PASSWORD:', process.env.DB_PASSWORD ? '***' : '(empty)');
 
-const path = require('path');
-const app  = express();
+
+
+function requireLogin(req, res, next) {
+  if (!req.session || !req.session.user) {
+    return res.redirect('/index.html'); // redirect to login if not logged in
+  }
+  next();
+}
+
+app.get('/dashboard.html', requireLogin, (req, res) => {
+    res.sendFile('dashboard.html', { 
+    root: path.resolve(__dirname, '..', 'Frontend') 
+  }, (err) => {
+    if (err) {
+      console.error("SendFile error:", err);
+      res.status(404).send("Could not find dashboard.html in the Frontend folder.");
+    }
+  });
+
+});
 
 // Serve static HTML files from Frontend folder
 app.use(express.static(path.join(__dirname, '..', 'Frontend')));
@@ -95,15 +123,25 @@ app.post('/login', async (req, res) => {
             teacherID = teachers[0].teacherID;
         }
 
-        res.json({
-            message:  'Login successful!',
+        req.session.user = {
+            id: user.userID,
+            fullname: user.fullname,
             role,
-            fullname:  user.fullname,
             studentID,
-            teacherID,
-            redirect: 'dashboard.html'
-        });
+            teacherID
+        };
 
+        req.session.save(err => {
+          if (err) {
+            console.error("Session Save Error:", err);
+            return res.status(500).json({ message: "Session sync failed" });
+          }
+          res.json({
+            message: 'Login successful!',
+            fullname: user.fullname,
+            redirect: 'dashboard.html'
+          });
+        });
     } catch (err) {
         console.error('Login error:', err);
         res.status(500).json({ message: 'Login failed: ' + err.message });
@@ -337,12 +375,21 @@ app.delete('/admin/users/:id', async (req, res) => {
     }
 });
 
+app.get('/logout', (req, res) => {
+  req.session.destroy(err => {
+    if (err) {
+      console.error('Logout error:', err);
+      return res.status(500).send('Failed to logout');
+    }
+    res.clearCookie('connect.sid'); // clear the session cookie
+    res.redirect('/index.html');    // or send JSON if you prefer
+  });
+});
+
 // 404 handler
 app.use((req, res) => {
     res.status(404).sendFile(path.join(__dirname, '..', 'Frontend', '404.html'));
 });
-
-app.use(reservationsRoutes);
  
 // Start server on port 7878
 initDB().then(() => {
