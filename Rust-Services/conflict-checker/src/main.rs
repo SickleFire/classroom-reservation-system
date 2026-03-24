@@ -18,6 +18,7 @@ struct Reservation {
     endtime: String,
     teacher_id: i32,
     classroom_id: i32,
+    classroom_name: String,     // new
 }
 
 
@@ -80,9 +81,11 @@ async fn get_reservations_list(
         r.starttime,
         r.endtime,
         r.teacherID,
-        r.classroomID
+        r.classroomID,
+        cl.name AS classroom_name   -- only the classroom name
     FROM implementations r
     JOIN courses c ON r.courseID = c.courseID
+    JOIN classrooms cl ON r.classroomID = cl.classroomID
     "#;
 
     eprintln!("Running query: {}", query);
@@ -98,8 +101,9 @@ async fn get_reservations_list(
             starttime,
             endtime,
             teacher_id_opt,
-            classroom_id
-        ): (i32, i32, String, i32, String, String, Option<i32>, i32)| {
+            classroom_id,
+            classroom_name
+        ): (i32, i32, String, i32, String, String, Option<i32>, i32, String)| {
             eprintln!(
                     "Mapping row -> impl_id: {}, course_id: {}, course_name: {}, is_onlineclass_raw: {}, start: {}, end: {}, teacher_id: {:?}, classroom_id: {}",
                     implementation_id, course_id, course_name, is_onlineclass_raw, starttime, endtime, teacher_id_opt, classroom_id
@@ -113,6 +117,7 @@ async fn get_reservations_list(
                 endtime,
                 teacher_id: teacher_id_opt.unwrap_or_default(),
                 classroom_id,
+                classroom_name
             }
         },
     )
