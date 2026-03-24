@@ -7,11 +7,25 @@ module.exports = function(pool) {
 
 router.get('/reserve-events', async (req, res) => {
     try {
-        const [rows] = await pool.query('SELECT room_name, time FROM reservations');
+        const [rows] = await pool.query(`SELECT 
+              r.implementationID,
+              r.courseID,
+              c.name AS course_name,
+              r.is_onlineclass,
+              r.starttime,
+              r.endtime,
+              r.teacherID,
+              r.classroomID,
+              cl.name AS classroom_name   -- only the classroom name
+              FROM implementations r
+              JOIN courses c ON r.courseID = c.courseID
+              JOIN classrooms cl ON r.classroomID = cl.classroomID`);
         const events = rows.map(r => ({
-            title: `Room ${r.room_name}`,
-            start: r.time   // must be in ISO format (YYYY-MM-DD HH:MM)
+            title: `${r.course_name} (${r.classroom_name})`,
+            start: r.starttime,
+            end: r.endtime
         }));
+        console.log(events);
         res.json(events);
     } catch (err) {
         console.error('Events error:', err);
