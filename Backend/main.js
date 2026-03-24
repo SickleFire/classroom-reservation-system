@@ -1,7 +1,7 @@
 const express = require('express');
 const session = require('express-session');
 const bcrypt  = require('bcrypt');
-const mysql = require('mysql2');
+const mysql   = require('mysql2');
 require('dotenv').config();
 
 const path = require('path');
@@ -16,36 +16,30 @@ const pool = mysql.createPool({
 }).promise();
 
 app.use(session({
-  secret: '101',   // change this
-  resave: false,
-  saveUninitialized: false,
-  cookie: { secure: false }    // set secure:true if using HTTPS
+    secret:            process.env.SESSION_SECRET || '101',
+    resave:            false,
+    saveUninitialized: false,
+    cookie:            { secure: false }
 }));
 
 const reservationsRoutes = require('./reservations.js')(pool);
 
-console.log('DB_USER:', process.env.DB_USER);
-console.log('DB_PASSWORD:', process.env.DB_PASSWORD ? '***' : '(empty)');
-
-
-
 function requireLogin(req, res, next) {
-  if (!req.session || !req.session.user) {
-    return res.redirect('/index.html'); // redirect to login if not logged in
-  }
-  next();
+    if (!req.session || !req.session.user) {
+        return res.redirect('/index.html');
+    }
+    next();
 }
 
 app.get('/dashboard.html', requireLogin, (req, res) => {
-    res.sendFile('dashboard.html', { 
-    root: path.resolve(__dirname, '..', 'Frontend') 
-  }, (err) => {
-    if (err) {
-      console.error("SendFile error:", err);
-      res.status(404).send("Could not find dashboard.html in the Frontend folder.");
-    }
-  });
-
+    res.sendFile('dashboard.html', {
+        root: path.resolve(__dirname, '..', 'Frontend')
+    }, (err) => {
+        if (err) {
+            console.error('SendFile error:', err);
+            res.status(404).send('Could not find dashboard.html');
+        }
+    });
 });
 
 // Serve static HTML files from Frontend folder
@@ -69,21 +63,27 @@ async function initDB() {
                 time      TEXT NOT NULL
             )
         `);
-        await pool.query(`
-            CREATE TABLE IF NOT EXISTS users (
-                firstname TEXT NOT NULL,
-                lastname  TEXT NOT NULL,
-                email     TEXT NOT NULL,
-                password  TEXT NOT NULL
-            )
-        `);
         console.log('Database tables ready.');
     } catch (err) {
         console.error('DB init error:', err);
     }
 }
 
-// ─── LOGIN (handles Student, Teacher, Admin automatically) ───────────────────
+// ─── GET SESSION INFO ─────────────────────────────────────────────────────────
+
+app.get('/session/me', (req, res) => {
+    if (!req.session || !req.session.user) {
+        return res.status(401).json({ message: 'Not logged in.' });
+    }
+    res.json({
+        role:      req.session.user.role,
+        fullname:  req.session.user.fullname,
+        studentID: req.session.user.studentID || null,
+        teacherID: req.session.user.teacherID || null
+    });
+});
+
+// ─── LOGIN ────────────────────────────────────────────────────────────────────
 
 app.post('/login', async (req, res) => {
     const { email, password } = req.body;
@@ -124,24 +124,25 @@ app.post('/login', async (req, res) => {
         }
 
         req.session.user = {
-            id: user.userID,
-            fullname: user.fullname,
+            id:        user.userID,
+            fullname:  user.fullname,
             role,
             studentID,
             teacherID
         };
 
         req.session.save(err => {
-          if (err) {
-            console.error("Session Save Error:", err);
-            return res.status(500).json({ message: "Session sync failed" });
-          }
-          res.json({
-            message: 'Login successful!',
-            fullname: user.fullname,
-            redirect: 'dashboard.html'
-          });
+            if (err) {
+                console.error('Session save error:', err);
+                return res.status(500).json({ message: 'Session sync failed.' });
+            }
+            res.json({
+                message:  'Login successful!',
+                fullname: user.fullname,
+                redirect: 'dashboard.html'
+            });
         });
+
     } catch (err) {
         console.error('Login error:', err);
         res.status(500).json({ message: 'Login failed: ' + err.message });
@@ -155,7 +156,7 @@ app.post('/register/student', async (req, res) => {
 
     try {
         const [existing] = await pool.query(
-            'SELECT userID FROM users WHERE email = ?', [email]
+            'SELECT userID FROM Users WHERE email = ?', [email]
         );
         if (existing.length > 0) {
             return res.status(400).json({ message: 'Email already registered.' });
@@ -164,7 +165,7 @@ app.post('/register/student', async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
 
         const [userResult] = await pool.query(
-            'INSERT INTO users (fullname, email, password, account_created) VALUES (?, ?, ?, NOW())',
+            'INSERT INTO Users (fullname, email, password, account_created) VALUES (?, ?, ?, NOW())',
             [`${firstname} ${lastname}`, email, hashedPassword]
         );
         const userID = userResult.insertId;
@@ -174,7 +175,7 @@ app.post('/register/student', async (req, res) => {
         const studentID = `2026${String(nextNum).padStart(3, '0')}-S`;
 
         await pool.query(
-            'INSERT INTO students (studentID, firstname, lastname, phone, userID) VALUES (?, ?, ?, ?, ?)',
+            'INSERT INTO Students (studentID, firstname, lastname, phone, userID) VALUES (?, ?, ?, ?, ?)',
             [studentID, firstname, lastname, phone, userID]
         );
 
@@ -224,7 +225,7 @@ app.post('/register/teacher', async (req, res) => {
     }
 });
 
-// ─── GET COURSES (for registerclass.html dropdown) ───────────────────────────
+// ─── GET COURSES ─────────────────────────────────────────────────────────────
 
 app.get('/schedule/courses', async (req, res) => {
     try {
@@ -238,14 +239,10 @@ app.get('/schedule/courses', async (req, res) => {
     }
 });
 
-// ─── GET AVAILABLE ROOMS (with Debugging) ───────────────────
+// ─── GET AVAILABLE ROOMS ──────────────────────────────────────────────────────
 
 app.get('/schedule/available-rooms', async (req, res) => {
     const { starttime, endtime } = req.query;
-
-    // DEBUG: See what times the frontend is checking for
-    console.log(`--- DEBUG: Checking Availability ---`);
-    console.log(`Requested Range: ${starttime} to ${endtime}`);
 
     if (!starttime || !endtime) {
         return res.status(400).json({ message: 'Start time and end time are required.' });
@@ -263,45 +260,53 @@ app.get('/schedule/available-rooms', async (req, res) => {
                 AND NOT (i.endtime <= ? OR i.starttime >= ?)
             )
         `, [starttime, endtime]);
-        
-        console.log(`DEBUG: Found ${rooms.length} available rooms.`);
-        res.json(rooms);
 
+        res.json(rooms);
     } catch (err) {
         console.error('Available rooms error:', err);
         res.status(500).json({ message: 'Failed to fetch available rooms.' });
     }
 });
 
-// ─── POST REQUESTS (Student & Room Validation) ─────────────────────────────
+// ─── POST REQUESTS ────────────────────────────────────────────────────────────
+// Handles Student, Teacher, and Admin room requests
 
 app.post('/requests', async (req, res) => {
-    const { studentID, courseID, classroomID, starttime, endtime } = req.body;
+    if (!req.session || !req.session.user) {
+        return res.status(401).json({ message: 'Not logged in.' });
+    }
 
-    // DEBUG: Logs incoming data to your terminal
-    console.log("--- DEBUG: Incoming Booking Request ---");
-    console.log(`Student: ${studentID} | Room: ${classroomID} | Course: ${courseID}`);
-    console.log(`Time Slot: ${starttime} to ${endtime}`);
+    const { courseID, classroomID, starttime, endtime } = req.body;
+    const role      = req.session.user.role;
+    const studentID = req.session.user.studentID || null;
+    const teacherID = req.session.user.teacherID || null;
 
-    if (!studentID || !courseID || !classroomID || !starttime || !endtime) {
+    if (!courseID || !classroomID || !starttime || !endtime) {
         return res.status(400).json({ message: 'All fields are required.' });
     }
 
     try {
-        // 1. VALIDATION: Check if Student ID exists in the database
-        const [studentCheck] = await pool.query(
-            'SELECT studentID FROM Students WHERE studentID = ?', [studentID]
-        );
-
-        if (studentCheck.length === 0) {
-            console.log(`DEBUG: Validation Failed - Student ID "${studentID}" not found.`);
-            return res.status(404).json({ 
-                message: `Submission failed: Student ID "${studentID}" is not registered. The form will not be submitted.` 
-            });
+        // Validate student ID exists if role is student
+        if (role === 'student') {
+            const [studentCheck] = await pool.query(
+                'SELECT studentID FROM Students WHERE studentID = ?', [studentID]
+            );
+            if (studentCheck.length === 0) {
+                return res.status(404).json({ message: 'Student ID not found.' });
+            }
         }
 
-        // 2. VALIDATION: Check for Room Conflicts (Double Booking)
-        // This checks if any 'Pending' or 'Approved' session overlaps with the requested time
+        // Validate teacher ID exists if role is teacher
+        if (role === 'teacher') {
+            const [teacherCheck] = await pool.query(
+                'SELECT teacherID FROM Teachers WHERE teacherID = ?', [teacherID]
+            );
+            if (teacherCheck.length === 0) {
+                return res.status(404).json({ message: 'Teacher ID not found.' });
+            }
+        }
+
+        // Check for conflicts
         const [conflicts] = await pool.query(`
             SELECT implementationID FROM Implementations
             WHERE classroomID = ?
@@ -310,29 +315,36 @@ app.post('/requests', async (req, res) => {
         `, [classroomID, endtime, starttime]);
 
         if (conflicts.length > 0) {
-            console.log(`DEBUG: Conflict Found - Room ${classroomID} is busy during this slot.`);
-            return res.status(409).json({ 
-                message: 'Submission failed: This room is already booked for the selected time. Please choose another room or time.' 
-            });
+            return res.status(409).json({ message: 'Room is already booked for this time slot.' });
         }
 
-        // 3. EXECUTION: If all checks pass, insert the record
+        // Insert into Implementations
+        // Student → requested_by = studentID, teacherID = NULL
+        // Teacher → teacherID = teacherID, requested_by = NULL, status = Approved
+        // Admin   → teacherID = NULL, requested_by = NULL, status = Approved
+        const status       = role === 'student' ? 'Pending' : 'Approved';
+        const reqBy        = role === 'student' ? studentID : null;
+        const assignedTeacher = role === 'teacher' ? teacherID : null;
+
         await pool.query(`
             INSERT INTO Implementations
                 (courseID, is_onlineclass, starttime, endtime, teacherID, classroomID, status, requested_by)
-            VALUES (?, 0, ?, ?, NULL, ?, 'Pending', ?)
-        `, [courseID, starttime, endtime, classroomID, studentID]);
+            VALUES (?, 0, ?, ?, ?, ?, ?, ?)
+        `, [courseID, starttime, endtime, assignedTeacher, classroomID, status, reqBy]);
 
-        console.log("DEBUG: Success - Request saved to Implementations table.");
-        res.json({ message: 'Room request submitted successfully! Waiting for admin approval.' });
+        const msg = role === 'student'
+            ? 'Room request submitted! Waiting for approval.'
+            : 'Session booked successfully!';
+
+        res.json({ message: msg });
 
     } catch (err) {
-        console.error('DATABASE ERROR:', err);
-        res.status(500).json({ message: 'Server Error: ' + err.message });
+        console.error('Request error:', err);
+        res.status(500).json({ message: 'Server error: ' + err.message });
     }
 });
 
-// ─── GET ALL USERS (for userlist.html) ───────────────────────────────────────
+// ─── GET ALL USERS ────────────────────────────────────────────────────────────
 
 app.get('/admin/users', async (req, res) => {
     try {
@@ -367,7 +379,6 @@ app.delete('/admin/users/:id', async (req, res) => {
     const { id } = req.params;
 
     try {
-        // Get studentID and teacherID first
         const [students] = await pool.query(
             'SELECT studentID FROM Students WHERE userID = ?', [id]
         );
@@ -375,7 +386,6 @@ app.delete('/admin/users/:id', async (req, res) => {
             'SELECT teacherID FROM Teachers WHERE userID = ?', [id]
         );
 
-        // Delete Implementations tied to this student or teacher
         if (students.length > 0) {
             await pool.query(
                 'DELETE FROM Implementations WHERE requested_by = ?',
@@ -389,12 +399,9 @@ app.delete('/admin/users/:id', async (req, res) => {
             );
         }
 
-        // Then delete from Students or Teachers
         await pool.query('DELETE FROM Students WHERE userID = ?', [id]);
         await pool.query('DELETE FROM Teachers WHERE userID = ?', [id]);
-
-        // Finally delete from Users
-        await pool.query('DELETE FROM Users WHERE userID = ?', [id]);
+        await pool.query('DELETE FROM Users    WHERE userID = ?', [id]);
 
         res.json({ message: 'User deleted successfully.' });
     } catch (err) {
@@ -403,22 +410,24 @@ app.delete('/admin/users/:id', async (req, res) => {
     }
 });
 
+// ─── LOGOUT ───────────────────────────────────────────────────────────────────
+
 app.get('/logout', (req, res) => {
-  req.session.destroy(err => {
-    if (err) {
-      console.error('Logout error:', err);
-      return res.status(500).send('Failed to logout');
-    }
-    res.clearCookie('connect.sid'); // clear the session cookie
-    res.redirect('/index.html');    // or send JSON if you prefer
-  });
+    req.session.destroy(err => {
+        if (err) {
+            console.error('Logout error:', err);
+            return res.status(500).send('Failed to logout');
+        }
+        res.clearCookie('connect.sid');
+        res.redirect('/index.html');
+    });
 });
 
 // 404 handler
 app.use((req, res) => {
     res.status(404).sendFile(path.join(__dirname, '..', 'Frontend', '404.html'));
 });
- 
+
 // Start server on port 7878
 initDB().then(() => {
     app.listen(7878, '127.0.0.1', () => {
