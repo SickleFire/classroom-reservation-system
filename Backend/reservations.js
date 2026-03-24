@@ -58,8 +58,25 @@ router.get('/reservations', async (req, result) => {
   } catch (err) {
     console.error('Error calling Rust service:', err);
   }
-
 })
+
+router.put('/reservations/:id', async (req, res) => {
+  const { status } = req.body;
+  const { id } = req.params;
+
+  try {
+    await pool.query(
+      "UPDATE implementations SET status = ? WHERE implementationID = ?",
+      [status, id]
+    );
+    res.json({ message: `Reservation ${id} updated to ${status}` });
+  } catch (err) {
+    console.error('Update error:', err);
+    res.status(500).json({ message: 'Failed to update reservation.' });
+  }
+});
+
+
 
 return router;
 
