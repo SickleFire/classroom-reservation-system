@@ -37,7 +37,7 @@ router.get('/reservations', async (req, result) => {
     const res = await fetch('http://127.0.0.1:8080/get-reservations-list');
     if (!res.ok) throw new Error('Failed to fetch reservations');
     const reservations = await res.json();
-
+    
     console.log('Reservations from Rust:', reservations);
     // You can now render them in your table
     result.json(reservations);

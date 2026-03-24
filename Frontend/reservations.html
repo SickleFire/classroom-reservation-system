@@ -78,13 +78,13 @@
 
         tbody.innerHTML += `
           <tr>
-            <td>${r.implementationID}</td>
-            <td>${r.courseID}</td>
+            <td>${r.implementation_id}</td>
+            <td>${r.course_name}</td>
             <td>${r.is_onlineclass ? 'Yes' : 'No'}</td>
             <td>${new Date(r.starttime).toLocaleString()}</td>
             <td>${new Date(r.endtime).toLocaleString()}</td>
-            <td>${r.teacherID}</td>
-            <td>${r.classroomID}</td>
+            <td>${r.teacher_id}</td>
+            <td>${r.classroom_id}</td>
             <td class="${statusClass}">${status}</td>
           </tr>
         `;

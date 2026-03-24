@@ -12,6 +12,7 @@ struct ConflictRequest {
 struct Reservation {
     implementation_id: i32,
     course_id: i32,
+    course_name: String,
     is_onlineclass: bool,
     starttime: String,
     endtime: String,
@@ -55,8 +56,13 @@ async fn check_conflict(
 async fn get_reservations_list(
     pool: web::Data<Pool>
 ) -> impl Responder {
+    eprintln!("Starting get_reservations_list...");
+
     let mut conn = match pool.get_conn().await {
-        Ok(conn) => conn,
+        Ok(conn) => {
+            eprintln!("DB connection established.");
+            conn
+        },
         Err(e) => {
             eprintln!("DB connection error: {:?}", e);
             return HttpResponse::InternalServerError().json(
@@ -66,26 +72,53 @@ async fn get_reservations_list(
     };
 
     let query = r#"
-        SELECT implementationID, courseID, is_onlineclass, starttime, endtime, teacherID, classroomID
-        FROM implementations
+        SELECT 
+        r.implementationID,
+        r.courseID,
+        c.name AS course_name,
+        r.is_onlineclass,
+        r.starttime,
+        r.endtime,
+        r.teacherID,
+        r.classroomID
+    FROM implementations r
+    JOIN courses c ON r.courseID = c.courseID
     "#;
 
+    eprintln!("Running query: {}", query);
+
     let result: Result<Vec<Reservation>, _> = conn
-        .query_map(
-            query,
-            |(implementation_id, course_id, is_onlineclass, starttime, endtime, teacher_id, classroom_id)| {
-                Reservation {
-                    implementation_id,
-                    course_id,
-                    is_onlineclass,
-                    starttime,
-                    endtime,
-                    teacher_id,
-                    classroom_id,
-                }
-            },
-        )
-        .await;
+    .query_map(
+        query,
+        |(
+            implementation_id,
+            course_id,
+            course_name,          // <-- include this
+            is_onlineclass_raw,
+            starttime,
+            endtime,
+            teacher_id_opt,
+            classroom_id
+        ): (i32, i32, String, i32, String, String, Option<i32>, i32)| {
+            eprintln!(
+                    "Mapping row -> impl_id: {}, course_id: {}, course_name: {}, is_onlineclass_raw: {}, start: {}, end: {}, teacher_id: {:?}, classroom_id: {}",
+                    implementation_id, course_id, course_name, is_onlineclass_raw, starttime, endtime, teacher_id_opt, classroom_id
+                );
+            Reservation {
+                implementation_id,
+                course_id,
+                course_name,
+                is_onlineclass: is_onlineclass_raw != 0, // convert tinyint to bool
+                starttime,
+                endtime,
+                teacher_id: teacher_id_opt.unwrap_or_default(),
+                classroom_id,
+            }
+        },
+    )
+    .await;
+
+
 
     match result {
         Ok(reservations) => HttpResponse::Ok().json(reservations),
