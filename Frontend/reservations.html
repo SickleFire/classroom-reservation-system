@@ -51,6 +51,19 @@
 
   <script>
     let allReservations = [];
+    let currentUserRole = null;
+
+    fetch('/session/me')
+      .then(res => res.ok ? res.json() : Promise.reject('Not logged in'))
+      .then(user => {
+        currentUserRole = user.role;
+        // ... your header logic here ...
+    })
+      .catch(err => {
+        console.error(err);
+        window.location.href = 'index.html';
+    });
+
 
     async function loadReservations() {
       try {
@@ -81,25 +94,35 @@
         } else {
           statusClass = ''; // Pending or other
         }
-
-
-        tbody.innerHTML += `
-          <tr>
-            <td>${r.implementation_id}</td>
-            <td>${r.course_name}</td>
-            <td>${r.is_onlineclass ? 'Yes' : 'No'}</td>
-            <td>${new Date(r.starttime).toLocaleString()}</td>
-            <td>${new Date(r.endtime).toLocaleString()}</td>
-            <td>${r.student_id}</td>
-            <td>${r.teacher_id_str}</td>
-            <td>${r.classroom_name}</td>
-            <td class="${statusClass}">${r.status}</td>
-            <td>
-              <button onclick="updateReservation(${r.implementation_id}, 'Approved')">Accept</button>
-              <button onclick="updateReservation(${r.implementation_id}, 'Rejected')">Reject</button>
-            </td>
-          </tr>
-        `;
+        // Build row
+          let row = `
+            <tr>
+              <td>${r.implementation_id}</td>
+              <td>${r.course_name}</td>
+              <td>${r.is_onlineclass ? 'Yes' : 'No'}</td>
+              <td>${new Date(r.starttime).toLocaleString()}</td>
+              <td>${new Date(r.endtime).toLocaleString()}</td>
+              <td>${r.student_id}</td>
+              <td>${r.teacher_id_str}</td>
+              <td>${r.classroom_name}</td>
+              <td class="${statusClass}">${r.status}</td>
+          `;
+              
+          // Only show actions if role is teacher or admin
+          if (currentUserRole === 'teacher' || currentUserRole === 'admin') {
+            row += `
+              <td>
+                <button onclick="updateReservation(${r.implementation_id}, 'Approved')">Accept</button>
+                <button onclick="updateReservation(${r.implementation_id}, 'Rejected')">Reject</button>
+              </td>
+            `;
+          } else {
+            row += `<td>-</td>`; // placeholder for students
+          }
+          
+          row += `</tr>`;
+          tbody.innerHTML += row;
+          
       });
     }
 
