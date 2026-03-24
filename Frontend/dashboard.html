@@ -12,12 +12,17 @@
             margin: 0;
             background-color: #f4f6f9;
         }
+        
+        header.role-student { background-color: #28a745 !important; }
+        header.role-teacher { background-color: #007bff !important; }
+        header.role-admin   { background-color: #F45B26 !important; }
+
         header {
-            background-color: #000000;
-            color: white;
-            padding: 1rem;
-            text-align: center;
-            
+        background-color: #000000; /* Default */
+        color: white;
+        padding: 1rem;
+        text-align: center;
+        transition: background-color 0.5s ease; /* Smooth color fade */
         }
         nav {
             background-color: #333;
@@ -71,9 +76,9 @@
 </head>
 <body>
     <header>
-        <h1>Admin Dashboard</h1>
-        <p>Welcome, Admin!</p>
-    </header>
+    <h1 id="header-title">Dashboard</h1>
+    <p>Welcome, <span id="user-fullname">Loading...</span>!</p>
+</header>
 
     <nav>
         <a href="dashboard.html">Dashboard</a>
@@ -122,6 +127,45 @@
 
     <script>
     document.addEventListener('DOMContentLoaded', function() {
+
+// --- 1. SESSION CHECKER & DYNAMIC STYLING ---
+    fetch('/session/me')
+    .then(res => res.ok ? res.json() : Promise.reject('Not logged in'))
+    .then(user => {
+        const header = document.querySelector('header');
+        const headerTitle = document.getElementById('header-title');
+        const userFullname = document.getElementById('user-fullname');
+
+        // Set Name and Title text
+        userFullname.innerText = user.fullname;
+        
+        // Change Header Background based on role
+        if (user.role === 'admin') {
+            header.classList.add('role-admin');
+            headerTitle.innerText = 'Admin Dashboard';
+        } else if (user.role === 'teacher') {
+            header.classList.add('role-teacher');
+            headerTitle.innerText = 'Teacher Dashboard';
+        } else if (user.role === 'student') {
+            header.classList.add('role-student');
+            headerTitle.innerText = 'Student Dashboard';
+        }
+
+        // Optional: Hide admin-only links for non-admins
+        if (user.role !== 'admin') {
+            const adminLinks = ['registerclass.html', 'userlist.html'];
+            document.querySelectorAll('nav a').forEach(link => {
+                if (adminLinks.some(url => link.href.includes(url))) {
+                    link.style.display = 'none';
+                }
+            });
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        window.location.href = 'index.html';
+    });
+
         // 1. Initialize the Calendar
         var calendarEl = document.getElementById('calendar');
         var calendar = new FullCalendar.Calendar(calendarEl, {
@@ -148,7 +192,7 @@
             })
             .then(data => {
                 console.log("Data received:", data); 
-                updateStats(data); // This was missing and causing a crash
+                updateStats(data);
                 updateRecentList(data);
             })
             .catch(err => {
