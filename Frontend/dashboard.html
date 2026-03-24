@@ -102,24 +102,16 @@
 
             <div class="card">
                 <h4>System Stats</h4>
-                <p>Total Reservations: 120</p>
-                <p>Active Users: 45</p>
-                <p>Available Rooms: 10</p>
+                <p>Total Reservations: <span id="stat-total">0</span></p>
+                <p>Active Reservations: <span id="stat-active">0</span></p>
+                <p>Available Rooms: <span id="stat-rooms">10</span></p>
             </div>
 
             <div class="card">
                 <h4>Recent Reservations</h4>
-                <ul>
-                    <li>Room 101 reserved by John (2026-03-22 10:00)</li>
-                    <li>Room 202 reserved by Sarah (2026-03-22 14:00)</li>
-                    <li>Room 303 reserved by Alex (2026-03-23 09:00)</li>
+                <ul id="recent-list">
+                <li>Loading recent reservations...</li>
                 </ul>
-            </div>
-
-            <div class="card">
-                <h4>Admin Actions</h4>
-                <button onclick="alert('Add new room')">Add Room</button>
-                <button onclick="alert('Generate report')">Generate Report</button>
             </div>
         </main>
     </div>
@@ -129,15 +121,16 @@
     </footer>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function() {
+        // 1. Initialize the Calendar
         var calendarEl = document.getElementById('calendar');
         var calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
-            events: '/reserve-events', // backend endpoint returning reservations
+            events: '/reserve-events', 
             eventTimeFormat: {
                 hour: 'numeric',
                 minute: '2-digit',
-                meridiem: 'short' // shows "AM"/"PM" instead of "a"/"p"
+                meridiem: 'short'
             },
             headerToolbar: {
                 left: 'prev,next today',
@@ -145,8 +138,80 @@
                 right: 'dayGridMonth,timeGridWeek,timeGridDay'
             }
         });
-            calendar.render();
-        });
+        calendar.render();
+
+        // 2. Fetch data for Stats and Recent List
+        fetch('/reservations')
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
+            .then(data => {
+                console.log("Data received:", data); 
+                updateStats(data); // This was missing and causing a crash
+                updateRecentList(data);
+            })
+            .catch(err => {
+                console.error('Error syncing dashboard:', err);
+                document.getElementById('recent-list').innerHTML = '<li>Error loading data.</li>';
+            });
+
+        // --- Helper Functions ---
+
+        function updateStats(reservations) {
+            const now = new Date();
+            // Update Total
+            document.getElementById('stat-total').innerText = reservations.length;
+            // Update Active (End time is in the future)
+            const activeCount = reservations.filter(r => new Date(r.endtime) > now).length;
+            document.getElementById('stat-active').innerText = activeCount;
+        }
+
+        function updateRecentList(reservations) {
+    const listContainer = document.getElementById('recent-list');
+    listContainer.innerHTML = ''; 
+
+    if (!reservations || reservations.length === 0) {
+        listContainer.innerHTML = '<li>No reservations found.</li>';
+        return;
+    }
+
+    const recent = [...reservations]
+        .sort((a, b) => new Date(b.starttime) - new Date(a.starttime))
+        .slice(0, 3);
+
+    recent.forEach(r => {
+        const date = new Date(r.starttime).toLocaleDateString();
+        const time = new Date(r.starttime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        
+        const li = document.createElement('li');
+        
+        // --- IMPROVED LOGIC: Treating '-' as Admin ---
+        let reservedBy = "Admin"; 
+
+        // 1. Check Student ID
+        if (r.student_id && r.student_id !== "" && r.student_id !== "null" && r.student_id !== "-") {
+            reservedBy = `Student: ${r.student_id}`;
+        } 
+        // 2. Check Teacher ID (specifically filtering out the dash)
+        else if (r.teacher_id_str && 
+                 r.teacher_id_str !== 0 && 
+                 r.teacher_id_str !== "0" && 
+                 r.teacher_id_str !== "null" && 
+                 r.teacher_id_str !== "-") { 
+            reservedBy = `Teacher: ${r.teacher_id_str}`;
+        }
+
+        const room = r.classroom_name || `Room ${r.classroom_id}`;
+        
+        li.style.padding = "8px 0";
+        li.innerHTML = `<strong>${room}</strong> reserved by <strong>${reservedBy}</strong> <br> 
+                        <small style="color: #555;">${date} at ${time}</small>`;
+        
+        listContainer.appendChild(li);
+            });
+        }
+    });
     </script>
 </body>
 </html>
