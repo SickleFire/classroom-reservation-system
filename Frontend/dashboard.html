@@ -151,9 +151,8 @@
             headerTitle.innerText = 'Student Dashboard';
         }
 
-        // Optional: Hide admin-only links for non-admins
         if (user.role !== 'admin') {
-            const adminLinks = ['registerclass.html', 'userlist.html'];
+            const adminLinks = ['userlist.html'];
             document.querySelectorAll('nav a').forEach(link => {
                 if (adminLinks.some(url => link.href.includes(url))) {
                     link.style.display = 'none';
