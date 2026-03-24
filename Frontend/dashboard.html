@@ -151,7 +151,7 @@
             headerTitle.innerText = 'Student Dashboard';
         }
 
-        if (user.role !== 'admin') {
+        if (user.role !== 'admin' || 'teacher') {
             const adminLinks = ['userlist.html'];
             document.querySelectorAll('nav a').forEach(link => {
                 if (adminLinks.some(url => link.href.includes(url))) {
