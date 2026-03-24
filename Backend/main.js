@@ -328,9 +328,9 @@ app.post('/requests', async (req, res) => {
 
         await pool.query(`
             INSERT INTO Implementations
-                (courseID, is_onlineclass, starttime, endtime, teacherID, classroomID, status, requested_by)
-            VALUES (?, 0, ?, ?, ?, ?, ?, ?)
-        `, [courseID, starttime, endtime, assignedTeacher, classroomID, status, reqBy]);
+                (courseID, is_onlineclass, starttime, endtime, teacherID, studentID, classroomID, status, requested_by)
+            VALUES (?, 0, ?, ?, ?, ?, ?, ?, ?)
+        `, [courseID, starttime, endtime, assignedTeacher, studentID, classroomID, status, reqBy]);
 
         const msg = role === 'student'
             ? 'Room request submitted! Waiting for approval.'
