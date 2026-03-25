@@ -430,7 +430,7 @@ app.use((req, res, next) => {
 
 // 404 handler
 app.use((req, res) => {
-    res.status(404).send('Not Found');
+    res.status(404).sendFile(path.join(__dirname, '..', 'Frontend', '404.html'));
 });
 
 // Start server on port 7878
