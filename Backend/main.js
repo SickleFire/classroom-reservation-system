@@ -85,7 +85,7 @@ app.get('/session/me', (req, res) => {
 
 // ─── LOGIN ────────────────────────────────────────────────────────────────────
 
-app.post('/api/login', async (req, res) => {
+app.post('/login', async (req, res) => {
     const { email, password } = req.body;
     console.log('Login attempt:', req.body);
 
