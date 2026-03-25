@@ -84,6 +84,9 @@ app.get('/session/me', (req, res) => {
 });
 
 // ─── LOGIN ────────────────────────────────────────────────────────────────────
+app.get('/login', (req, res) => {
+    res.sendFile(path.join(__dirname, 'Frontend', 'login.html'));
+});
 
 app.post('/login', async (req, res) => {
     const { email, password } = req.body;
