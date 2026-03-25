@@ -424,6 +424,17 @@ app.get('/logout', (req, res) => {
     });
 });
 
+app.get('/ping', (req, res) => {
+    console.log('Ping route hit');
+    res.json({ ok: true, message: 'Backend is alive!' });
+});
+
+// Or if you want to test POST as well:
+app.post('/ping', (req, res) => {
+    console.log('Ping POST hit with body:', req.body);
+    res.json({ ok: true, body: req.body });
+});
+
 app.use((req, res, next) => {
     console.log('Incoming:', req.method, req.path);
     next();
