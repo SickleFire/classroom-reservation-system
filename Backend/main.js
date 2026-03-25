@@ -423,6 +423,11 @@ app.get('/logout', (req, res) => {
     });
 });
 
+app.use((req, res, next) => {
+    console.log('Incoming:', req.method, req.path);
+    next();
+});
+
 // 404 handler
 app.use((req, res) => {
     res.status(404).sendFile(path.join(__dirname, '..', 'Frontend', '404.html'));
