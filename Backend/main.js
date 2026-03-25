@@ -84,7 +84,7 @@ app.get('/session/me', (req, res) => {
 });
 
 // ─── LOGIN ────────────────────────────────────────────────────────────────────
-app.get('/login', (req, res) => {
+app.get('/api/login', (req, res) => {
     res.sendFile(path.join(__dirname, 'Frontend', 'login.html'));
 });
 
