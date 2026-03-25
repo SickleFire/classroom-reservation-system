@@ -150,7 +150,7 @@ async fn get_reservations_list(
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    let pool = Pool::new("mysql://root:lumecraft@localhost:3306/classroom_reservations");
+    let pool = Pool::new("mysql://root:lumecraft@mysql:3306/classroom_reservations");
 
 
     HttpServer::new(move || {
@@ -159,7 +159,7 @@ async fn main() -> std::io::Result<()> {
             .service(check_conflict) // register route
             .service(get_reservations_list)
     })
-    .bind(("127.0.0.1", 8080))?
+    .bind(("0.0.0.0", 8080))?
     .run()
     .await
 }
