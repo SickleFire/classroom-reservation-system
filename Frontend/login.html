@@ -194,6 +194,7 @@ async function submitLogin() {
             document.getElementById('message').textContent = result.message;
         }
     } catch (err) {
+        console.log(err);
         document.getElementById('message').textContent = 'Login failed. Please try again.';
     }
 }
