@@ -87,6 +87,7 @@ app.get('/session/me', (req, res) => {
 
 app.post('/api/login', async (req, res) => {
     const { email, password } = req.body;
+    console.log('Login attempt:', req.body);
 
     try {
         const [rows] = await pool.query(
