@@ -78,8 +78,7 @@ app.get('/session/me', (req, res) => {
     res.json({
         role:      req.session.user.role,
         fullname:  req.session.user.fullname,
-        studentID: req.session.user.studentID || null,
-        teacherID: req.session.user.teacherID || null
+        coordinatorID: req.session.user.studentID || null,
     });
 });
 
@@ -112,23 +111,11 @@ app.post('/login', async (req, res) => {
         );
 
         let role      = 'admin';
-        let studentID = null;
-        let teacherID = null;
-
-        if (students.length > 0) {
-            role      = 'student';
-            studentID = students[0].studentID;
-        } else if (teachers.length > 0) {
-            role      = 'teacher';
-            teacherID = teachers[0].teacherID;
-        }
 
         req.session.user = {
             id:        user.userID,
             fullname:  user.fullname,
-            role,
-            studentID,
-            teacherID
+            role
         };
 
         req.session.save(err => {
