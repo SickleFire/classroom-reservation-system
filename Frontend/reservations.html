@@ -3,131 +3,141 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Reservation List</title>
+  <title>Class Schedule List</title>
   <style>
     body { font-family: Arial, sans-serif; background: #f4f6f9; padding: 2rem; margin: 0; }
     h2 { color: #333; margin-bottom: 1rem; }
     table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-    th, td { border: 1px solid #dee2e6; padding: 10px 14px; text-align: left; font-size: 0.9rem; }
-    th { background: #343a40; color: #fff; font-weight: bold; }
+    th, td { border: 1px solid #dee2e6; padding: 12px 14px; text-align: left; font-size: 0.85rem; }
+    /* Coordinator Orange Theme */
+    th { background: #F45B26; color: #fff; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
     tr:nth-child(even) { background: #f8f9fa; }
-    tr:hover { background: #e9ecef; }
-    .status-active { color: #28a745; font-weight: bold; }
-    .status-finished { color: #6c757d; font-weight: bold; }
+    tr:hover { background: #fff4f0; }
+    
+    .status-scheduled { color: #28a745; font-weight: bold; }
+    .status-cancelled { color: #dc3545; font-weight: bold; }
+    .badge-weekly { background: #007bff; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; }
+    
     .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-    .btn-back { padding: 0.5rem 1rem; background: #6c757d; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9rem; }
-    .btn-back:hover { background: #545b62; }
-    .message { margin-top: 1rem; }
+    .btn-back { padding: 0.5rem 1rem; background: #333; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9rem; }
+    .btn-back:hover { background: #000; }
+    
+    .action-btn { padding: 4px 8px; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem; margin-right: 5px; }
+    .btn-cancel { background: #dc3545; color: white; }
+    .btn-approve { background: #28a745; color: white; }
   </style>
 </head>
 <body>
 
   <div class="top-bar">
-    <h2>Reservation List</h2>
-    <button class="btn-back" onclick="window.location.href='dashboard.html'">← Back</button>
+    <h2 id="table-title">Class Schedule List</h2>
+    <button class="btn-back" onclick="window.location.href='dashboard.html'">← Back to Dashboard</button>
   </div>
 
   <table>
     <thead>
       <tr>
-        <th>Implementation ID</th>
-        <th>Course ID</th>
-        <th>Online Class</th>
+        <th>ID</th>
+        <th>Course</th>
+        <th>Weekly?</th>
         <th>Start Time</th>
         <th>End Time</th>
-        <th>Student ID</th>
-        <th>Teacher ID</th>
-        <th>Classroom ID</th>
+        <th>Teacher</th>
+        <th>Classroom</th>
         <th>Status</th>
         <th>Actions</th>
       </tr>
     </thead>
-    <tbody id="reservationTableBody">
-      <tr><td colspan="8">Loading reservations...</td></tr>
+    <tbody id="scheduleTableBody">
+      <tr><td colspan="9">Loading schedule data...</td></tr>
     </tbody>
   </table>
 
-  <p class="message" id="message"></p>
+  <p id="message" style="text-align: center; margin-top: 15px; color: #666;"></p>
 
   <script>
-    let allReservations = [];
-    let currentUserRole = null;
+    let allSchedules = [];
+    let currentUser = null;
 
-    fetch('/session/me')
-      .then(res => res.ok ? res.json() : Promise.reject('Not logged in'))
-      .then(user => {
-        currentUserRole = user.role;
-        // ... your header logic here ...
-    })
-      .catch(err => {
-        console.error(err);
-        window.location.href = 'index.html';
-    });
-
-
-    async function loadReservations() {
+    // 1. Get Session Info
+    async function checkSession() {
       try {
-        const res = await fetch('/reservations');
-        allReservations = await res.json();
-        renderTable();
+        const res = await fetch('/session/me');
+        if (!res.ok) throw new Error('Not logged in');
+        currentUser = await res.json();
+        
+        // Update title based on role
+        if (currentUser.role === 'admin' || currentUser.role === 'coordinator') {
+            document.getElementById('table-title').innerText = "Management: Class Schedules";
+        }
+        
+        loadSchedules();
       } catch (err) {
-        document.getElementById('message').textContent = 'Failed to load reservations.';
-        console.error('Load reservations error:', err);
+        window.location.href = 'index.html';
       }
     }
 
-    function renderTable() {
-      const tbody = document.getElementById('reservationTableBody');
+    // 2. Load Data from Backend (via Rust service/MySQL)
+    async function loadSchedules() {
+      try {
+        const res = await fetch('/reservations'); // Updated to your new route
+        allSchedules = await res.json();
+        renderTable();
+      } catch (err) {
+        document.getElementById('message').textContent = 'Error: Could not connect to schedule service.';
+      }
+    }
 
-      if (allReservations.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8">No reservations found.</td></tr>';
+    // 3. Display the Table
+    function renderTable() {
+      const tbody = document.getElementById('scheduleTableBody');
+      if (allSchedules.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">No scheduled classes found.</td></tr>';
         return;
       }
 
       tbody.innerHTML = '';
-      allReservations.forEach(r => {
-        let statusClass = '';
-        if (r.status === 'Approved') {
-          statusClass = 'status-active';   // green
-        } else if (r.status === 'Rejected') {
-          statusClass = 'status-finished'; // gray/red
-        } else {
-          statusClass = ''; // Pending or other
-        }
-        // Build row
-          let row = `
-            <tr>
-              <td>${r.implementation_id}</td>
-              <td>${r.course_name}</td>
-              <td>${r.is_onlineclass ? 'Yes' : 'No'}</td>
-              <td>${new Date(r.starttime).toLocaleString()}</td>
-              <td>${new Date(r.endtime).toLocaleString()}</td>
-              <td>${r.student_id}</td>
-              <td>${r.teacher_id_str}</td>
-              <td>${r.classroom_name}</td>
-              <td class="${statusClass}">${r.status}</td>
+      allSchedules.forEach(item => {
+        // Map data from your SQL implementation table structure
+        const id = item.implementationID || item.implementation_id;
+        const course = item.course_name || `Course #${item.courseID}`;
+        const room = item.classroom_name || `Room #${item.classroomID}`;
+        const teacher = item.teacher_fname ? `${item.teacher_fname} ${item.teacher_lname}` : 'Unassigned';
+        const isWeekly = item.is_weekly ? '<span class="badge-weekly">Weekly</span>' : 'One-time';
+        const status = item.status || 'Scheduled';
+        
+        const statusClass = status === 'Scheduled' ? 'status-scheduled' : 'status-cancelled';
+
+        let row = `
+          <tr>
+            <td>${id}</td>
+            <td><strong>${course}</strong></td>
+            <td>${isWeekly}</td>
+            <td>${new Date(item.starttime).toLocaleString()}</td>
+            <td>${new Date(item.endtime).toLocaleString()}</td>
+            <td>${teacher}</td>
+            <td>${room}</td>
+            <td class="${statusClass}">${status}</td>
+            <td>
+        `;
+
+        // Only Admin or Coordinator can modify schedules
+        if (currentUser.role === 'admin' || currentUser.role === 'coordinator') {
+          row += `
+            <button class="action-btn btn-approve" onclick="updateStatus(${id}, 'Scheduled')">Restore</button>
+            <button class="action-btn btn-cancel" onclick="updateStatus(${id}, 'Cancelled')">Cancel</button>
           `;
-              
-          // Only show actions if role is teacher or admin
-          if (currentUserRole === 'teacher' || currentUserRole === 'admin') {
-            row += `
-              <td>
-                <button onclick="updateReservation(${r.implementation_id}, 'Approved')">Accept</button>
-                <button onclick="updateReservation(${r.implementation_id}, 'Rejected')">Reject</button>
-              </td>
-            `;
-          } else {
-            row += `<td>-</td>`; // placeholder for students
-          }
-          
-          row += `</tr>`;
-          tbody.innerHTML += row;
-          
+        } else {
+          row += `<span style="color:#999">View Only</span>`;
+        }
+
+        row += `</td></tr>`;
+        tbody.innerHTML += row;
       });
     }
 
-    async function updateReservation(id, newStatus) {
-      console.log("Updating reservation:", id, newStatus);
+    // 4. Update Status (Cancel/Restore)
+    async function updateStatus(id, newStatus) {
       try {
         const res = await fetch(`/reservations/${id}`, {
           method: 'PUT',
@@ -136,19 +146,16 @@
         });
       
         if (res.ok) {
-          // Refresh the table after update
-          await loadReservations();
+          loadSchedules(); // Refresh table
         } else {
-          const errMsg = await res.text();
-          document.getElementById('message').textContent = `Failed to update: ${errMsg}`;
+          alert('Failed to update schedule.');
         }
       } catch (err) {
         console.error('Update error:', err);
-        document.getElementById('message').textContent = 'Error updating reservation.';
       }
     }
-    window.onload = loadReservations;
-  </script>
 
+    window.onload = checkSession;
+  </script>
 </body>
 </html>
