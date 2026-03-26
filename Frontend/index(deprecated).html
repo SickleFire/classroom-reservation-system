@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Classroom Reservation</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: Georgia, serif;
+      background: #1c1c1c;
+      color: #222;
+    }
+
+    .page {
+      width: 100%;
+      max-width: 1920px;
+      margin: 0 auto;
+      background: #f5f2ed;
+    }
+
+    nav {
+      background: #2b2b2b;
+      padding: 12px 30px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 25px;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      font-size: 12px;
+      text-transform: uppercase;
+      font-family: Arial, sans-serif;
+      letter-spacing: 1px;
+      transition: color 0.3s ease;
+    }
+
+    nav a:hover {
+      color: #d8c59f;
+    }
+
+    section {
+      width: 100%;
+      min-height: 100vh;
+    }
+
+    .hero {
+      padding: 20px;
+      background: #f5f2ed;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hero-box {
+      position: relative;
+      width: 95%;
+      height: 90vh;
+      border-radius: 22px;
+      overflow: hidden;
+      background: url("room 1.png") no-repeat center center/cover;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .hero-box::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.35);
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      color: white;
+    }
+
+    .hero-content h1 {
+      font-size: 150px;
+      font-weight: normal;
+      line-height: 1;
+    }
+
+    .hero-content h2 {
+      font-size: 52px;
+      font-weight: normal;
+      margin-bottom: 30px;
+      line-height: 1;
+    }
+
+    .reserve-btn {
+      display: inline-block;
+      padding: 12px 28px;
+      background: white;
+      color: black;
+      border-radius: 30px;
+      text-decoration: none;
+      font-size: 18px;
+      transition: background 0.3s ease, transform 0.3s ease;
+    }
+
+    .reserve-btn:hover {
+      background: #e6dccd;
+      transform: scale(1.05);
+    }
+
+    .features {
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+      gap: 40px;
+      padding: 60px 70px;
+      background: #efefef;
+      text-align: center;
+    }
+
+    .feature {
+      flex: 1;
+      max-width: 500px;
+      border: 2px solid #d8c59f;
+      border-radius: 18px;
+      padding: 30px 25px;
+      background: #ffffff;
+      max-height: 500px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .feature:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    }
+
+    .feature .icon {
+      font-size: 34px;
+      margin-bottom: 15px;
+    }
+
+    .feature h3 {
+      color: #2d3ca6;
+      font-size: 28px;
+      line-height: 1.2;
+      margin-bottom: 15px;
+    }
+
+    .feature p {
+      font-size: 16px;
+      line-height: 1.8;
+      text-align: justify;
+      padding-top: 30px;
+    }
+
+    .about {
+      background: url("board.jpg") no-repeat center center/cover;
+      color: white;
+      padding: 80px 60px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .about h2 {
+      font-size: 60px;
+      margin-bottom: 20px;
+    }
+
+    .about p {
+      font-size: 18px;
+      line-height: 1.9;
+      max-width: 1000px;
+      text-align: justify;
+      margin-bottom: 20px;
+    }
+
+    .how-it-works {
+      background: #f7f1e7;
+      padding: 70px 60px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .how-it-works h2 {
+      text-align: center;
+      font-size: 60px;
+      margin-bottom: 40px;
+      color: #111;
+    }
+
+    .steps {
+      column-count: 2;
+      column-gap: 60px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .step {
+      break-inside: avoid;
+      margin-bottom: 20px;
+    }
+
+    .step h3 {
+      color: #2d3ca6;
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+
+    .step p {
+      font-size: 16px;
+      line-height: 1.8;
+      text-align: justify;
+    }
+
+    @media (max-width: 1024px) {
+      .hero-content h1 {
+        font-size: 58px;
+      }
+
+      .hero-content h2 {
+        font-size: 38px;
+      }
+
+      .features {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .feature {
+        max-width: 90%;
+      }
+
+      .steps {
+        column-count: 1;
+      }
+    }
+
+    @media (max-width: 768px) {
+      nav {
+        justify-content: center;
+        gap: 15px;
+        flex-wrap: wrap;
+      }
+
+      .hero-box {
+        height: 70vh;
+      }
+
+      .hero-content h1 {
+        font-size: 45px;
+      }
+
+      .hero-content h2 {
+        font-size: 30px;
+      }
+
+      .about h2,
+      .how-it-works h2 {
+        font-size: 40px;
+      }
+
+      .about p,
+      .step p,
+      .feature p {
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="page">
+
+    <nav>
+      <a href="#home">Home</a>
+      <a href="#about">About</a>
+      <a href="#HowItWorks">How It Works?</a>
+      <a href="register.html">Sign In</a>
+    </nav>
+
+    <section class="hero" id="home">
+      <div class="hero-box">
+        <div class="hero-content">
+          <h1>Classroom</h1>
+          <h2>Reservation</h2>
+          <a href="login.html" class="reserve-btn">Reserve Now</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="features">
+  <div class="feature">
+    <div class="icon">🖱️</div>
+    <h3>Easy Request<br>and Reservation</h3>
+    <p>
+      The system allows users to submit classroom reservation requests quickly
+      through a simple and user-friendly interface, reducing the need for manual
+      processes and paperwork.
+    </p>
+  </div>
+
+  <div class="feature">
+    <div class="icon">📋</div>
+    <h3>Real-Time<br>Schedule & Availability</h3>
+    <p>
+      Users can view updated classroom schedules and availability in real time,
+      helping prevent conflicts, double bookings, and confusion caused by outdated
+      information.
+    </p>
+  </div>
+
+  <div class="feature">
+    <div class="icon">⚖️</div>
+    <h3>Organized & Efficient<br>Management</h3>
+    <p>
+      All reservations are stored and managed in one centralized system, ensuring
+      a more organized process, fair room allocation, and efficient handling of
+      multiple classes and schedules.
+    </p>
+  </div>
+</section>
+    <section class="about" id="about">
+      <h2>ABOUT</h2>
+<p>
+  The Classroom Scheduling System is designed to assist coordinators in managing
+  classroom reservations for students and teachers in an organized and efficient
+  manner. Its main purpose is to prevent conflicts, overlapping reservations, and
+  confusion in room assignments by providing a centralized platform where all
+  requests and schedules can be monitored and controlled properly.
+</p>
+<p>
+  Through this system, coordinators can check room availability, review and approve
+  requests, and assign appropriate time slots based on both classroom availability
+  and teachers’ schedules. It ensures that every class, meeting, or academic
+  activity is given a proper room without affecting other reservations. By
+  automating the scheduling process, the system reduces manual errors, avoids
+  double-booking, and makes classroom management more efficient and reliable.
+</p>
+    </section>
+
+    <section class="how-it-works" id="HowItWorks">
+      <h2>How It Works?</h2>
+<div class="steps">
+
+  <div class="step">
+    <h3>1. Coordinator logs into the system.</h3>
+    <p>The coordinator accesses the system through the login page using their account credentials.</p>
+  </div>
+
+  <div class="step">
+    <h3>2. The coordinator dashboard is displayed.</h3>
+    <p>After logging in, the system shows a dashboard where the coordinator can view schedules, requests, and room availability.</p>
+  </div>
+
+  <div class="step">
+    <h3>3. Students and teachers submit requests.</h3>
+    <p>Students and teachers send classroom reservation requests, including their preferred time, room, and schedule.</p>
+  </div>
+
+  <div class="step">
+    <h3>4. The coordinator reviews requests.</h3>
+    <p>The coordinator checks each request, considering room availability, teacher schedules, and existing bookings.</p>
+  </div>
+
+  <div class="step">
+    <h3>5. Requests are approved or adjusted.</h3>
+    <p>The coordinator approves requests or makes necessary adjustments to avoid conflicts and ensure proper scheduling.</p>
+  </div>
+
+  <div class="step">
+    <h3>6. Approved schedules are recorded.</h3>
+    <p>Once approved, reservations are added to the official classroom schedule stored in the system.</p>
+  </div>
+
+  <div class="step">
+    <h3>7. The updated schedule is visible.</h3>
+    <p>Students and teachers can view the updated schedule to check room assignments and availability.</p>
+  </div>
+
+  <div class="step">
+    <h3>8. The system prevents conflicts.</h3>
+    <p>Because all reservations are managed by the coordinator in one system, scheduling conflicts and double bookings are minimized.</p>
+  </div>
+
+</div>
+    </section>
+
+  </div>
+
+</body>
+</html>
