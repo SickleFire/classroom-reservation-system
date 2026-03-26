@@ -1,181 +1,149 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Classroom Reservation Login</title>
-<style>
-    html, body {
-        height: 100%;
-        margin: 0;
-        font-family: Arial, sans-serif;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coordinator Login - Classroom Reservation</title>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
 
-    body {
-        position: relative;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background: url('stdnt.jpg') no-repeat center center fixed;
-        background-size: cover;
-        transition: background 0.5s ease;
-    }
+        body {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: url('teacher.jpg') no-repeat center center fixed;
+            background-size: cover;
+        }
 
-  
-    body::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background-color: rgba(0,0,0,0.5);
-        z-index: 0;
-        transition: background 0.5s ease-in-out;
-    }
+        /* Dark overlay for readability */
+        body::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-color: rgba(0,0,0,0.6);
+            z-index: 0;
+        }
 
-    .login-container {
-        position: relative; /* above overlay */
-        z-index: 1;
-        background: rgba(255, 255, 255, 0.95);
-        padding: 2rem;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        width: 300px;
-    }
+        .login-container {
+            position: relative; 
+            z-index: 1;
+            background: rgba(255, 255, 255, 0.98);
+            padding: 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+            width: 320px;
+        }
 
-    .login-container h2 {
-        text-align: center;
-        margin-bottom: 1rem;
-        color: #333;
-    }
+        .login-container h2 {
+            text-align: center;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
 
-    .toggle {
-        display: flex;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        overflow: hidden;
-        margin-bottom: 1.5rem;
-    }
+        .login-container p.subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+        }
 
-    .toggle button {
-        flex: 1;
-        padding: 0.5rem;
-        border: none;
-        background: #f4f6f9;
-        color: #555;
-        font-weight: bold;
-        cursor: pointer;
-        font-size: 0.9rem;
-        transition: background 0.2s, color 0.2s;
-    }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #444;
+            font-weight: bold;
+            font-size: 0.85rem;
+        }
 
-    .toggle button.active-student { background: #000000; color: #fff; }
-    .toggle button.active-teacher { background: #007bff; color: #fff; }
+        input {
+            width: 100%;
+            padding: 0.75rem;
+            margin-bottom: 1.2rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
 
-    label {
-        display: block;
-        margin-bottom: 0.5rem;
-        color: #555;
-    }
+        input:focus {
+            outline: none;
+            border-color: #F45B26; /* Coordinator Orange */
+        }
 
-    input {
-        width: 100%;
-        padding: 0.6rem;
-        margin-bottom: 1rem;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        box-sizing: border-box;
-    }
+        .btn-coordinator {
+            width: 100%; 
+            padding: 0.8rem;
+            background: #F45B26; /* Deep Orange */
+            border: none;
+            border-radius: 6px; 
+            color: #fff;
+            font-weight: bold; 
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
 
-    .btn-student {
-        width: 100%; padding: 0.7rem;
-        background: #000000; border: none;
-        border-radius: 4px; color: #fff;
-        font-weight: bold; cursor: pointer;
-    }
-    .btn-student:hover { background: #414241; }
+        .btn-coordinator:hover {
+            background: #d44a1e;
+        }
 
-    .btn-teacher {
-        width: 100%; padding: 0.7rem;
-        background: #007bff; border: none;
-        border-radius: 4px; color: #fff;
-        font-weight: bold; cursor: pointer;
-    }
-    .btn-teacher:hover { background: #0056b3; }
+        .footer {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.85rem;
+            color: #777;
+        }
 
-    .footer {
-        text-align: center;
-        margin-top: 1rem;
-        font-size: 0.9rem;
-        color:#555555
-    }
+        .footer a { color: #F45B26; text-decoration: none; font-weight: bold; }
+        .footer a:hover { text-decoration: underline; }
 
-    .footer a { color: #007bff; text-decoration: none; }
-    .footer a:hover { text-decoration: underline; }
-
-    .message {
-        text-align: center;
-        font-size: 0.85rem;
-        color: #dc3545;
-        margin-top: 0.5rem;
-        min-height: 20px;
-    }
-</style>
+        .message {
+            text-align: center;
+            font-size: 0.85rem;
+            color: #dc3545;
+            margin-top: 1rem;
+            min-height: 20px;
+        }
+    </style>
 </head>
 <body>
 <div class="login-container">
-    <h2>Login</h2>
-    <div class="toggle">
-        <button id="btnStudent" class="active-student" onclick="switchRole('student')">Student</button>
-        <button id="btnTeacher" onclick="switchRole('teacher')">Teacher</button>
-    </div>
-    <label for="email">Email</label>
-    <input type="email" id="email" placeholder="Enter your email" required>
+    <h2>Coordinator Login</h2>
+    <p class="subtitle">Classroom Management System</p>
+    
+    <label for="email">Email Address</label>
+    <input type="email" id="email" placeholder="name@gmail.com" required>
+    
     <label for="password">Password</label>
     <input type="password" id="password" placeholder="••••••••" required>
-    <button id="loginBtn" class="btn-student" onclick="submitLogin()">Login as Student</button>
+    
+    <button id="loginBtn" class="btn-coordinator" onclick="submitLogin()">Login</button>
+    
     <p class="message" id="message"></p>
+    
     <div class="footer">
-        <p>Don't have an account? <a href="register.html">Register</a></p>
+        <p><br> <a href="register.html">Request Account</a></p>
     </div>
 </div>
 
 <script>
-let currentRole = 'student';
-
-function switchRole(role) {
-    currentRole = role;
-    const btnStudent = document.getElementById('btnStudent');
-    const btnTeacher = document.getElementById('btnTeacher');
-    const loginBtn   = document.getElementById('loginBtn');
-    const body       = document.body;
-
-    if (role === 'student') {
-        btnStudent.className = 'active-student';
-        btnTeacher.className = '';
-        loginBtn.className   = 'btn-student';
-        loginBtn.textContent = 'Login as Student';
-        body.style.backgroundImage = "url('stdnt.jpg')";
-    } else {
-        btnStudent.className = '';
-        btnTeacher.className = 'active-teacher';
-        loginBtn.className   = 'btn-teacher';
-        loginBtn.textContent = 'Login as Teacher';
-        body.style.backgroundImage = "url('teacher.jpg')";
-    }
-
-    document.getElementById('message').textContent = '';
-}
-
 async function submitLogin() {
     const email    = document.getElementById('email').value;
     const password = document.getElementById('password').value;
+    const message  = document.getElementById('message');
 
     if (!email || !password) {
-        document.getElementById('message').textContent = 'Please fill in all fields.';
+        message.textContent = 'Please enter your credentials.';
         return;
     }
 
     try {
-        const res    = await fetch('/login', {
+        const res = await fetch('/login', {
             method:  'POST',
             headers: { 'Content-Type': 'application/json' },
             body:    JSON.stringify({ email, password }),
@@ -185,16 +153,15 @@ async function submitLogin() {
         const result = await res.json();
 
         if (res.ok) {
-            localStorage.setItem('role',      result.role);
-            localStorage.setItem('fullname',  result.fullname);
-            localStorage.setItem('studentID', result.studentID || '');
-            localStorage.setItem('teacherID', result.teacherID || '');
+            // Save info and redirect to dashboard
+            localStorage.setItem('role', result.role);
+            localStorage.setItem('fullname', result.fullname);
             window.location.href = result.redirect;
         } else {
-            document.getElementById('message').textContent = result.message;
+            message.textContent = result.message;
         }
     } catch (err) {
-        document.getElementById('message').textContent = 'Login failed. Please try again.';
+        message.textContent = 'Connection error. Please try again.';
     }
 }
 </script>
