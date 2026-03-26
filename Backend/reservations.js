@@ -73,7 +73,7 @@ module.exports = function(pool) {
   router.get('/reservations', async (req, res) => {
     try {
       // Calling Rust to get the processed list of schedules
-      const response = await axios.get('http://127.0.0.1:8080/get-reservations-list');
+      const response = await axios.get('http://127.0.0.1:8080/reservations');
       
       // We pass the Rust data directly to the frontend
       // Ensure your Rust service returns an array of objects

@@ -4,9 +4,11 @@ use mysql_async::{Pool};
 use mysql_async::prelude::*;
 #[derive(Deserialize)]
 struct ConflictRequest {
-    room: String,
-    time: String,
+    room: i32,
+    start: String,
+    end: String,
 }
+
 
 #[derive(Serialize)]
 struct Reservation {
@@ -17,8 +19,6 @@ struct Reservation {
     starttime: String,
     endtime: String,
     teacher_id: i32,
-    student_id: String,
-    teacher_id_str: String,
     classroom_id: i32,
     classroom_name: String,
     status: String
@@ -30,14 +30,14 @@ async fn check_conflict(
     req: web::Json<ConflictRequest>,
     pool: web::Data<Pool>,
 ) -> impl Responder {
-    println!("Checking room={} time={}", req.room, req.time);
     let mut conn = pool.get_conn().await.unwrap();
     
     // Query to check conflicts
     let count: Option<u64> = conn.exec_first(
-        "SELECT COUNT(*) FROM reservations WHERE room_name = ? AND time = ?",
-        (&req.room, &req.time),
+        "SELECT COUNT(*) FROM implementations WHERE classroomID = ? AND starttime = ? AND endtime = ?",
+        (&req.room, &req.start, &req.end),
     ).await.unwrap();
+
 
     let available = count.unwrap_or(0) == 0;
 
@@ -46,17 +46,11 @@ async fn check_conflict(
         return HttpResponse::Ok().json(serde_json::json!({ "available": false }));
     }
 
-    // Insert new reservation
-    conn.exec_drop(
-        "INSERT INTO reservations (room_name, time) VALUES (?, ?)",
-        (&req.room, &req.time),
-    ).await.unwrap();
-
     HttpResponse::Ok().json(serde_json::json!({ "available": available }))
 
 }
 
-#[get("/get-reservations-list")]
+#[get("/reservations")]
 async fn get_reservations_list(
     pool: web::Data<Pool>
 ) -> impl Responder {
@@ -84,7 +78,6 @@ async fn get_reservations_list(
         r.starttime,
         r.endtime,
         r.teacherID,
-        r.studentID,
         r.classroomID,
         cl.name AS classroom_name,   -- only the classroom name
         r.status
@@ -105,15 +98,14 @@ async fn get_reservations_list(
             is_onlineclass_raw,
             starttime,
             endtime,
-            teacher_id_opt,
-            student_id_opt,
+            teacher_id,
             classroom_id,
             classroom_name,
             status
-        ): (i32, i32, String, i32, String, String, Option<i32>, Option<String>, i32, String, String)| {
+        ): (i32, i32, String, i32, String, String, i32, i32, String, String)| {
             eprintln!(
                     "Mapping row -> impl_id: {}, course_id: {}, course_name: {}, is_onlineclass_raw: {}, start: {}, end: {}, teacher_id: {:?}, classroom_id: {}",
-                    implementation_id, course_id, course_name, is_onlineclass_raw, starttime, endtime, teacher_id_opt, classroom_id,
+                    implementation_id, course_id, course_name, is_onlineclass_raw, starttime, endtime, teacher_id, classroom_id,
                 );
             Reservation {
                 implementation_id,
@@ -122,13 +114,9 @@ async fn get_reservations_list(
                 is_onlineclass: is_onlineclass_raw != 0, // convert tinyint to bool
                 starttime,
                 endtime,
-                teacher_id: teacher_id_opt.unwrap_or_default(),
-                student_id: student_id_opt.unwrap_or_default(),
+                teacher_id,
                 classroom_id,
                 classroom_name,
-                teacher_id_str: teacher_id_opt
-                    .map(|id| format!("{:03}", id)) // "001"
-                    .unwrap_or_else(|| "-".to_string()),
                 status
             }
         },
