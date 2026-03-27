@@ -103,15 +103,22 @@ app.post('/login', async (req, res) => {
             return res.status(401).json({ message: 'Invalid email or password.' });
         }
 
-        const [coordinator] = await pool.query(
-            'SELECT coordinatorID FROM coordinators WHERE userID = ?', [user.userID]
+        const [coordinatorRows] = await pool.query(
+            'SELECT firstname, lastname FROM coordinators WHERE userID = ?', [user.userID]
         );
+
+        let fullname = user.fullname; // fallback
+        if (coordinatorRows.length > 0) {
+            fullname = coordinatorRows[0].firstname + ' ' + coordinatorRows[0].lastname;
+        }
+
+
 
         let role      = 'admin';
 
         req.session.user = {
             id:        user.userID,
-            fullname:  coordinator.firstname + coordinator.lastname,
+            fullname:  fullname,
             role
         };
 
@@ -236,8 +243,6 @@ app.get('/schedule/available-rooms', async (req, res) => {
             AND c.classroomID NOT IN (
                 SELECT i.classroomID
                 FROM Implementations i
-                WHERE i.status IN ('Pending', 'Approved')
-                AND NOT (i.endtime <= ? OR i.starttime >= ?)
             )
         `, [starttime, endtime]);
 
@@ -331,18 +336,14 @@ app.get('/admin/users', async (req, res) => {
         const [users] = await pool.query(`
             SELECT
                 u.userID,
-                u.fullname,
                 u.email,
                 u.account_created,
-                s.studentID,
                 t.teacherID,
                 CASE
-                    WHEN s.studentID IS NOT NULL THEN 'Student'
                     WHEN t.teacherID IS NOT NULL THEN 'Teacher'
                     ELSE 'Admin'
                 END AS role
             FROM Users u
-            LEFT JOIN Students s ON u.userID = s.userID
             LEFT JOIN Teachers t ON u.userID = t.userID
             ORDER BY u.account_created DESC
         `);
