@@ -96,26 +96,22 @@ app.post('/login', async (req, res) => {
         if (rows.length === 0) {
             return res.status(401).json({ message: 'Invalid email or password.' });
         }
-
         const user  = rows[0];
-        const match = await bcrypt.compare(password, user.password);
+        const match = await bcrypt.compare(password, user.password_hash);
 
         if (!match) {
             return res.status(401).json({ message: 'Invalid email or password.' });
         }
 
-        const [students] = await pool.query(
-            'SELECT studentID FROM Students WHERE userID = ?', [user.userID]
-        );
-        const [teachers] = await pool.query(
-            'SELECT teacherID FROM Teachers WHERE userID = ?', [user.userID]
+        const [coordinator] = await pool.query(
+            'SELECT coordinatorID FROM coordinators WHERE userID = ?', [user.userID]
         );
 
         let role      = 'admin';
 
         req.session.user = {
             id:        user.userID,
-            fullname:  user.fullname,
+            fullname:  coordinator.firstname + coordinator.lastname,
             role
         };
 
@@ -139,8 +135,8 @@ app.post('/login', async (req, res) => {
 
 // ─── REGISTER STUDENT ────────────────────────────────────────────────────────
 
-app.post('/register/student', async (req, res) => {
-    const { firstname, lastname, phone, email, password } = req.body;
+app.post('/register/coordinator', async (req, res) => {
+    const { firstname, lastname, email, password } = req.body;
 
     try {
         const [existing] = await pool.query(
@@ -153,24 +149,20 @@ app.post('/register/student', async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
 
         const [userResult] = await pool.query(
-            'INSERT INTO Users (fullname, email, password, account_created) VALUES (?, ?, ?, NOW())',
-            [`${firstname} ${lastname}`, email, hashedPassword]
+            'INSERT INTO users (email, password_hash, account_created) VALUES ( ?, ?, NOW())',
+            [email, hashedPassword]
         );
         const userID = userResult.insertId;
 
-        const [countResult] = await pool.query('SELECT COUNT(*) AS count FROM Students');
-        const nextNum   = countResult[0].count + 1;
-        const studentID = `2026${String(nextNum).padStart(3, '0')}-S`;
-
         await pool.query(
-            'INSERT INTO Students (studentID, firstname, lastname, phone, userID) VALUES (?, ?, ?, ?, ?)',
-            [studentID, firstname, lastname, phone, userID]
+            'INSERT INTO coordinators (firstname, lastname, userID) VALUES (?, ?, ?)',
+            [ firstname, lastname, userID]
         );
 
-        res.json({ message: 'Registered successfully!', studentID });
+        res.json({ message: 'Registered successfully!', coordinatorID});
 
     } catch (err) {
-        console.error('Student register error:', err);
+        console.error('Coordinator register error:', err);
         res.status(500).json({ message: 'Registration failed: ' + err.message });
     }
 });
