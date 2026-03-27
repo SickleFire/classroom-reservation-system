@@ -78,7 +78,7 @@ async fn get_reservations_list(
         r.endtime,
         r.teacherID,
         r.classroomID,
-        cl.name AS classroom_name,   -- only the classroom name
+        cl.name AS classroom_name   -- only the classroom name
     FROM implementations r
     JOIN courses c ON r.courseID = c.courseID
     JOIN classrooms cl ON r.classroomID = cl.classroomID
