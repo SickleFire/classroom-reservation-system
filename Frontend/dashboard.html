@@ -6,77 +6,104 @@
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            background-color: #f4f6f9;
-        }
-        
-        header.role-student { background-color: #28a745 !important; }
-        header.role-teacher { background-color: #007bff !important; }
-        header.role-admin   { background-color: #F45B26 !important; }
 
-        header {
-        background-color: #000000; /* Default */
-        color: white;
-        padding: 1rem;
-        text-align: center;
-        transition: background-color 0.5s ease; /* Smooth color fade */
-        }
-        nav {
-            background-color: #333;
-            padding: 0.5rem;
-        }
-        nav a {
-            color: white;
-            margin: 0 1rem;
-            text-decoration: none;
-        }
-        nav a:hover {
-            text-decoration: underline;
-        }
-        .container {
-            display: flex;
-            margin: 1rem;
-        }
-        .sidebar {
-            width: 200px;
-            background: #fff;
-            border-right: 1px solid #ddd;
-            padding: 1rem;
-        }
-        .sidebar h3 {
-            margin-top: 0;
-        }
-        .content {
-            flex: 1;
-            padding: 1rem;
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-        }
-        .card {
-            background: #f9f9f9;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            border-radius: 6px;
-            border: 1px solid #ddd;
-        }
-        .card h4 {
-            margin-top: 0;
-        }
-        footer {
-            text-align: center;
-            padding: 1rem;
-            background: #eee;
-            margin-top: 2rem;
-        }
-    </style>
+<style>
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    min-height: 100vh;
+
+    
+    background: #eef1d7;
+    color: #1F2937;
+}
+
+header {
+    text-align: center;
+    padding: 1rem;
+    background: linear-gradient(135deg, #2449b8, #0a2448,#030b16);
+    border-bottom: 1px solid #E5E7EB;
+    color: #FFFFFF;
+}
+
+
+nav {
+    text-align: center;
+    padding: 0.5rem;
+    background: #ffffff;
+    border-bottom: 1px solid #E5E7EB;
+}
+
+nav a {
+    color:  #000000;
+    margin: 0 10px;
+    text-decoration: none;
+}
+
+nav a:hover {
+    color: #65bcef;
+}
+
+
+.container {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+    background-color: #d9dce0;
+}
+
+.sidebar {
+    width: 200px;
+    padding: 1rem;
+    border-radius: 10px;
+
+    background: #000000;
+    color: #FFFFFF;
+}
+
+.sidebar a {
+    color: #CBD5E1;
+    text-decoration: none;
+    display: block;
+    padding: 8px;
+    border-radius: 6px;
+}
+
+.sidebar a:hover {
+    background: #1E2A5A;
+    color: #FFFFFF;
+}
+
+
+.content {
+    flex: 1;
+}
+
+
+.card {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 12px;
+
+    background: #FFFFFFCC; 
+    backdrop-filter: blur(8px);
+
+    box-shadow: 0 4px 12px #0000001A;
+}
+
+
+footer {
+    text-align: center;
+    padding: 1rem;
+    background: #FFFFFF;
+    border-top: 1px solid #E5E7EB;
+}
+</style>
 </head>
 <body>
     <header>
-    <h1 id="header-title">Dashboard</h1>
+    <h1 id="header-title">Coordinator Dashboard</h1>
     <p>Welcome, <span id="user-fullname">Loading...</span>!</p>
 </header>
 
