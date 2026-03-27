@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Admin Dashboard - Classroom Reservation</title>
+    <title>Coordinator Dashboard - Classroom Reservation</title>
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -161,48 +161,25 @@ footer {
     </div>
 
     <footer>
-        <p>&copy; 2026 Classroom Reservation System</p>
+        <p>&copy; 2026 Coordinator Classroom Reservation System</p>
     </footer>
 
     <script>
     document.addEventListener('DOMContentLoaded', function() {
 
-// --- 1. SESSION CHECKER & DYNAMIC STYLING ---
-    fetch('/session/me')
-    .then(res => res.ok ? res.json() : Promise.reject('Not logged in'))
-    .then(user => {
-        const header = document.querySelector('header');
-        const headerTitle = document.getElementById('header-title');
-        const userFullname = document.getElementById('user-fullname');
+fetch('/session/me')
+.then(res => res.ok ? res.json() : Promise.reject('Not logged in'))
+.then(user => {
+    const headerTitle = document.getElementById('header-title');
+    const userFullname = document.getElementById('user-fullname');
 
-        // Set Name and Title text
-        userFullname.innerText = user.fullname;
-        
-        // Change Header Background based on role
-        if (user.role === 'admin') {
-            header.classList.add('role-admin');
-            headerTitle.innerText = 'Admin Dashboard';
-        } else if (user.role === 'teacher') {
-            header.classList.add('role-teacher');
-            headerTitle.innerText = 'Teacher Dashboard';
-        } else if (user.role === 'student') {
-            header.classList.add('role-student');
-            headerTitle.innerText = 'Student Dashboard';
-        }
-
-        if (user.role !== 'admin') {
-            const adminLinks = ['userlist.html'];
-            document.querySelectorAll('nav a').forEach(link => {
-                if (adminLinks.some(url => link.href.includes(url))) {
-                    link.style.display = 'none';
-                }
-            });
-        }
-    })
-    .catch(err => {
-        console.error(err);
-        window.location.href = 'index.html';
-    });
+    userFullname.innerText = user.fullname;
+    headerTitle.innerText = 'Coordinator Dashboard';
+})
+.catch(err => {
+    console.error(err);
+    window.location.href = 'index.html';
+});
 
         // 1. Initialize the Calendar
         var calendarEl = document.getElementById('calendar');
