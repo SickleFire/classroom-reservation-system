@@ -57,9 +57,9 @@ module.exports = function(pool) {
       // 2. If available, save to implementations table
       await pool.query(`
         INSERT INTO implementations 
-        (courseID, classroomID, teacherID, starttime, endtime, is_weekly, coordinatorID, status)
-        VALUES (?, ?, ?, ?, ?, ?, ?, 'Scheduled')
-      `, [courseID, classroomID, teacherID, starttime, endtime, is_weekly || 0, coordinatorID]);
+        (courseID, classroomID, teacherID, starttime, endtime, is_weekly, is_onlineclass)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `, [courseID, classroomID, teacherID, starttime, endtime, is_weekly || 0, 0]);
 
       res.json({ message: 'Success! Class scheduled and verified by Rust.' });
 

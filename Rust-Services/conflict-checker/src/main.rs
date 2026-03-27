@@ -29,6 +29,8 @@ async fn check_conflict(
     req: web::Json<ConflictRequest>,
     pool: web::Data<Pool>,
 ) -> impl Responder {
+    println!("check-conflict request");
+
     let mut conn = pool.get_conn().await.unwrap();
     
     // Query to check conflicts
@@ -38,15 +40,14 @@ async fn check_conflict(
     ).await.unwrap();
 
 
-    let available = count.unwrap_or(0) == 0;
+    let count = count.unwrap_or(0);
 
-    if count.unwrap_or(0) > 0 {
+    if count > 0 {
         // Already reserved
         return HttpResponse::Ok().json(serde_json::json!({ "available": false }));
     }
 
-    HttpResponse::Ok().json(serde_json::json!({ "available": available }))
-
+    HttpResponse::Ok().json(serde_json::json!({ "available": true }))
 }
 
 #[get("/reservations")]
