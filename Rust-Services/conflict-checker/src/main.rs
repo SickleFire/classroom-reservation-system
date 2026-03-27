@@ -21,7 +21,6 @@ struct Reservation {
     teacher_id: i32,
     classroom_id: i32,
     classroom_name: String,
-    status: String
 }
 
 
@@ -101,8 +100,7 @@ async fn get_reservations_list(
             teacher_id,
             classroom_id,
             classroom_name,
-            status
-        ): (i32, i32, String, i32, String, String, i32, i32, String, String)| {
+        ): (i32, i32, String, i32, String, String, i32, i32, String)| {
             eprintln!(
                     "Mapping row -> impl_id: {}, course_id: {}, course_name: {}, is_onlineclass_raw: {}, start: {}, end: {}, teacher_id: {:?}, classroom_id: {}",
                     implementation_id, course_id, course_name, is_onlineclass_raw, starttime, endtime, teacher_id, classroom_id,
@@ -116,8 +114,7 @@ async fn get_reservations_list(
                 endtime,
                 teacher_id,
                 classroom_id,
-                classroom_name,
-                status
+                classroom_name
             }
         },
     )

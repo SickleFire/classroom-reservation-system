@@ -20,7 +20,7 @@ body {
     color: #FFFFFF;
     position: relative;
     padding: 20px;
-    background-image: url("stdnt.jpg"); /* default student */
+    background-image: url("teacher.jpg");
     background-position: center;
     background-size: cover;
     background-repeat: no-repeat;
@@ -47,32 +47,6 @@ body::before {
     margin-bottom: 1rem;
     color: #333333;
 }
-.toggle {
-    display: flex;
-    border: 1px solid #CCCCCC;
-    border-radius: 4px;
-    overflow: hidden;
-    margin-bottom: 1.5rem;
-}
-.toggle button {
-    flex: 1;
-    padding: 0.5rem;
-    border: none;
-    background: #F4F6F9;
-    color: #555555;
-    font-weight: bold;
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: background 0.2s, color 0.2s;
-}
-.toggle button.active-student {
-    background: #000000;
-    color: #FFFFFF;
-}
-.toggle button.active-teacher {
-    background: #1D95F7;
-    color: #FFFFFF;
-}
 label {
     display: block;
     margin-bottom: 0.5rem;
@@ -85,19 +59,6 @@ input {
     border: 1px solid #CCCCCC;
     border-radius: 4px;
     box-sizing: border-box;
-}
-.btn-student {
-    width: 100%;
-    padding: 0.7rem;
-    background: #050505;
-    border: none;
-    border-radius: 4px;
-    color: #FFFFFF;
-    font-weight: bold;
-    cursor: pointer;
-}
-.btn-student:hover {
-    background: #414241;
 }
 .btn-teacher {
     width: 100%;
@@ -119,16 +80,14 @@ input {
     width: 100%;  
     font-size: 15px; 
 }
-
 .footer p {
-    margin: 0;     
+    margin: 0;      
 }
 .footer a {
     color: #007BFF;
     text-decoration: none;
     font-weight: bold;
 }
-
 .footer a:hover {
     text-decoration: underline;
 }   
@@ -148,24 +107,25 @@ input {
 </head>
 <body>
 <div class="register-container">
-    <h2>Create Account</h2>
-    <div class="toggle">
-        <button type="button" id="btnStudent" class="active-student" onclick="switchRole('student')">Student</button>
-        <button type="button" id="btnTeacher" onclick="switchRole('teacher')">Teacher</button>
-    </div>
+    <h2>Coordinator Signup</h2>
+    
     <label for="firstname">First Name</label>
     <input type="text" id="firstname" placeholder="Juan" required>
+    
     <label for="lastname">Last Name</label>
     <input type="text" id="lastname" placeholder="Dela Cruz" required>
-    <label for="phone">Phone Number</label>
-    <input type="text" id="phone" placeholder="09171234567" required>
+    
     <label for="email">Email</label>
     <input type="email" id="email" placeholder="Enter your email" required>
+    
     <label for="password">Password</label>
     <input type="password" id="password" placeholder="••••••••" required>
+    
     <label for="confirm_password">Confirm Password</label>
     <input type="password" id="confirm_password" placeholder="••••••••" required>
-    <button type="button" id="registerBtn" class="btn-student" onclick="submitRegister()">Register as Student</button>
+    
+    <button type="button" id="registerBtn" class="btn-teacher" onclick="submitRegister()">Register as Coordinator</button>
+    
     <p class="message" id="message"></p>
     <div class="footer">
         <p>Already have an account? <a href="index.html">Login</a></p>
@@ -173,45 +133,16 @@ input {
 </div>
 
 <script>
-let currentRole = 'student';
-
-function switchRole(role) {
-    currentRole = role;
-    const btnStudent = document.getElementById('btnStudent');
-    const btnTeacher = document.getElementById('btnTeacher');
-    const registerBtn = document.getElementById('registerBtn');
-    const body = document.body;
-
-    if (role === 'student') {
-        btnStudent.className = 'active-student';
-        btnTeacher.className = '';
-        registerBtn.className = 'btn-student';
-        registerBtn.textContent = 'Register as Student';
-        body.style.backgroundImage = "url('stdnt.jpg')";
-    } else {
-        btnStudent.className = '';
-        btnTeacher.className = 'active-teacher';
-        registerBtn.className = 'btn-teacher';
-        registerBtn.textContent = 'Register as Teacher';
-        body.style.backgroundImage = "url('teacher.jpg')";
-    }
-
-
-    const msgEl = document.getElementById('message');
-    msgEl.textContent = '';
-    msgEl.className = 'message';
-}
-
 async function submitRegister() {
     const firstname = document.getElementById('firstname').value.trim();
     const lastname = document.getElementById('lastname').value.trim();
-    const phone = document.getElementById('phone').value.trim();
     const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
     const confirm_password = document.getElementById('confirm_password').value;
     const msgEl = document.getElementById('message');
 
-    if (!firstname || !lastname || !phone || !email || !password || !confirm_password) {
+    // Phone is removed from check to match DB
+    if (!firstname || !lastname || !email || !password || !confirm_password) {
         msgEl.className = 'message error';
         msgEl.textContent = 'Please fill in all fields.';
         return;
@@ -222,19 +153,18 @@ async function submitRegister() {
         return;
     }
 
-    const endpoint = currentRole === 'student' ? '/register/student' : '/register/teacher';
     try {
-        const res = await fetch(endpoint, {
+        const res = await fetch('/register/coordinator', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ firstname, lastname, phone, email, password })
+            body: JSON.stringify({ firstname, lastname, email, password })
         });
+        
         const result = await res.json();
+        
         if (res.ok) {
             msgEl.className = 'message success';
-            msgEl.textContent = currentRole === 'student' 
-                ? `Registered! Your Student ID is: ${result.studentID}` 
-                : `Registered! Your Teacher ID is: ${result.teacherID}`;
+            msgEl.textContent = `Registered! Coordinator ID: ${result.coordinatorID}`;
             setTimeout(() => { window.location.href = 'login.html'; }, 2000);
         } else {
             msgEl.className = 'message error';
