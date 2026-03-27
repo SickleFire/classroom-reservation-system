@@ -2,275 +2,256 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Coordinator Dashboard - Classroom Reservation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coordinator Dashboard</title>
+    
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&display=swap" rel="stylesheet">
 
-<style>
+    <style>
+        :root {
+            --primary-blue: #2343A2;
+            --dark-navy: #081C37;
+            --glass-bg: rgba(255, 255, 255, 0.85);
+            --sidebar-bg: rgba(1, 11, 24, 0.95);
+        }
 
-body {
-    margin: 0;
-    font-family: "Oswald", sans-serif;
-    min-height: 100vh;
-    background: url("board.jpg") no-repeat center center fixed;
-    background-size: cover;
-    position: relative;
-    color: #111827;
-}
+        body {
+            margin: 0;
+            font-family: "Oswald", sans-serif;
+            min-height: 100vh;
+            background: url("board.jpg") no-repeat center center fixed;
+            background-size: cover;
+            color: #111827;
+        }
 
+        /* Overlay for background readability */
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.3); 
+            z-index: -1;
+        }
 
-body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.25); 
-    z-index: -1;
-}
+        header {
+            text-align: center;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, var(--primary-blue), var(--dark-navy));
+            color: #FFFFFF;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
 
+        nav {
+            text-align: center;
+            padding: 0.75rem;
+            background: #FFFFFF;
+            border-bottom: 1px solid #E5E7EB;
+        }
 
-header {
-    text-align: center;
-    padding: 1rem;
-    background: linear-gradient(135deg, #2343A2, #0A2448, #081C37);
-    border-bottom: 1px solid #E5E7EB;
-    color: #FFFFFF;
-}
+        nav a {
+            color: #111827;
+            margin: 0 15px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
 
+        nav a:hover { color: #3B82F6; }
 
-nav {
-    text-align: center;
-    padding: 0.5rem;
-    background: #FFFFFF;
-    border-bottom: 1px solid #E5E7EB;
-}
+        .container {
+            display: flex;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
 
-nav a {
-    color: #111827;
-    margin: 0 10px;
-    text-decoration: none;
-    transition: color 0.3s ease;
-}
+        .sidebar {
+            width: 220px;
+            padding: 1.5rem;
+            border-radius: 12px;
+            background: var(--sidebar-bg);
+            color: #FFFFFF;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+            height: fit-content;
+        }
 
-nav a:hover {
-    color: #3B82F6;
-}
+        .sidebar h3 { margin-top: 0; border-bottom: 1px solid #334155; padding-bottom: 0.5rem; }
 
+        .sidebar ul { list-style: none; padding: 0; }
 
-.container {
-    display: flex;
-    gap: 1rem;
-    padding: 1rem;
-}
+        .sidebar a {
+            color: #E5E7EB;
+            text-decoration: none;
+            display: block;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 5px;
+            transition: 0.3s;
+        }
 
+        .sidebar a:hover { background: #1E3A8A; color: #FFFFFF; }
 
-.sidebar {
-    width: 200px;
-    padding: 1rem;
-    border-radius: 12px;
-    background: rgba(1, 11, 24, 0.95); 
-    color: #FFFFFF;
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
-}
+        .content { flex: 1; }
 
-.sidebar a {
-    color: #E5E7EB;
-    text-decoration: none;
-    display: block;
-    padding: 8px;
-    border-radius: 6px;
-    transition: background 0.3s ease, color 0.3s ease;
-}
+        .card {
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-radius: 14px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+        }
 
-.sidebar a:hover {
-    background: #1E3A8A;
-    color: #FFFFFF;
-}
+        .card h4 { margin-top: 0; color: var(--dark-navy); font-size: 1.2rem; }
 
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        
+        #recent-list { list-style: none; padding: 0; }
+        #recent-list li { border-bottom: 1px solid #ddd; padding: 10px 0; }
+        #recent-list li:last-child { border-bottom: none; }
 
-.content {
-    flex: 1;
-}
-
-
-.card {
-    padding: 1rem;
-    margin-bottom: 1rem;
-    border-radius: 14px;
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(10px);
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
-}
-
-
-footer {
-    text-align: center;
-    padding: 1rem;
-    background: #FFFFFF;
-    border-top: 1px solid #E5E7EB;
-}
-</style>
+        footer {
+            text-align: center;
+            padding: 1.5rem;
+            background: rgba(255,255,255,0.9);
+            margin-top: 2rem;
+        }
+    </style>
 </head>
 <body>
-    <header>
+
+<header>
     <h1 id="header-title">Coordinator Dashboard</h1>
-    <p>Welcome, <span id="user-fullname">Loading...</span>!</p>
+    <p>Welcome, <span id="user-fullname">Loading...</span></p>
 </header>
 
-    <nav>
-        <a href="dashboard.html">Dashboard</a>
-        <a href="reservations.html">Reservations</a>
-        <a href="registerclass.html">Add a classroom</a>
-        <a href="userlist.html">Users</a>
-        <a href="/logout">Logout</a>
-    </nav>
+<nav>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="reservations.html">Reservations</a>
+    <a href="registerclass.html">Classrooms</a>
+    <a href="userlist.html">Users</a>
+    <a href="/logout" style="color: #dc3545;">Logout</a>
+</nav>
 
-    <div class="container">
-        <aside class="sidebar">
-            <h3>Quick Links</h3>
-            <ul>
-                <li><a href="add-reservation.html">Add Reservation</a></li>
-                <li><a href="manage-rooms.html">Manage Rooms</a></li>
-                <li><a href="reports.html">Reports</a></li>
+<div class="container">
+    <aside class="sidebar">
+        <h3>Quick Links</h3>
+        <ul>
+            <li><a href="add-reservation.html">Add Reservation</a></li>
+            <li><a href="manage-rooms.html">Manage Rooms</a></li>
+            <li><a href="reports.html">Reports</a></li>
+        </ul>
+    </aside>
+
+    <main class="content">
+        <div class="card">
+            <h4>Reservation Calendar</h4>
+            <div id="calendar"></div>
+        </div>
+
+        <div class="card">
+            <h4>System Stats</h4>
+            <div class="stats-grid">
+                <div>Total: <b id="stat-total">0</b></div>
+                <div>Active: <b id="stat-active">0</b></div>
+                <div>Available Rooms: <b id="stat-rooms">10</b></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h4>Recent Reservations</h4>
+            <ul id="recent-list">
+                <li>Loading...</li>
             </ul>
-        </aside>
+        </div>
+    </main>
+</div>
 
-        <main class="content">
+<footer>
+    <p>&copy; 2026 Coordinator Classroom Reservation System</p>
+</footer>
 
-            <div class="card">
-                <h4>Reservation Calendar</h4>
-                <div id="calendar"></div>
-            </div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    
+    // 1. Session Init
+    fetch('/session/me')
+    .then(res => res.ok ? res.json() : Promise.reject('Not logged in'))
+    .then(user => {
+        document.getElementById('user-fullname').innerText = user.fullname;
+    })
+    .catch(() => window.location.href = 'index.html');
 
-            <div class="card">
-                <h4>System Stats</h4>
-                <p>Total Reservations: <span id="stat-total">0</span></p>
-                <p>Active Reservations: <span id="stat-active">0</span></p>
-                <p>Available Rooms: <span id="stat-rooms">10</span></p>
-            </div>
-
-            <div class="card">
-                <h4>Recent Reservations</h4>
-                <ul id="recent-list">
-                <li>Loading recent reservations...</li>
-                </ul>
-            </div>
-        </main>
-    </div>
-
-    <footer>
-        <p>&copy; 2026 Coordinator Classroom Reservation System</p>
-    </footer>
-
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-
-fetch('/session/me')
-.then(res => res.ok ? res.json() : Promise.reject('Not logged in'))
-.then(user => {
-    const headerTitle = document.getElementById('header-title');
-    const userFullname = document.getElementById('user-fullname');
-
-    userFullname.innerText = user.fullname;
-    headerTitle.innerText = 'Coordinator Dashboard';
-})
-.catch(err => {
-    console.error(err);
-    window.location.href = 'index.html';
-});
-
-        // 1. Initialize the Calendar
-        var calendarEl = document.getElementById('calendar');
-        var calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'dayGridMonth',
-            events: '/reserve-events', 
-            eventTimeFormat: {
-                hour: 'numeric',
-                minute: '2-digit',
-                meridiem: 'short'
-            },
-            headerToolbar: {
-                left: 'prev,next today',
-                center: 'title',
-                right: 'dayGridMonth,timeGridWeek,timeGridDay'
-            }
-        });
-        calendar.render();
-
-        // 2. Fetch data for Stats and Recent List
-        fetch('/reservations')
-            .then(response => {
-                if (!response.ok) throw new Error('Network response was not ok');
-                return response.json();
-            })
-            .then(data => {
-                console.log("Data received:", data); 
-                updateStats(data);
-                updateRecentList(data);
-            })
-            .catch(err => {
-                console.error('Error syncing dashboard:', err);
-                document.getElementById('recent-list').innerHTML = '<li>Error loading data.</li>';
-            });
-
-        // --- Helper Functions ---
-
-        function updateStats(reservations) {
-            const now = new Date();
-            // Update Total
-            document.getElementById('stat-total').innerText = reservations.length;
-            // Update Active (End time is in the future)
-            const activeCount = reservations.filter(r => new Date(r.endtime) > now).length;
-            document.getElementById('stat-active').innerText = activeCount;
-        }
-
-        function updateRecentList(reservations) {
-    const listContainer = document.getElementById('recent-list');
-    listContainer.innerHTML = ''; 
-
-    if (!reservations || reservations.length === 0) {
-        listContainer.innerHTML = '<li>No reservations found.</li>';
-        return;
-    }
-
-    const recent = [...reservations]
-        .sort((a, b) => new Date(b.starttime) - new Date(a.starttime))
-        .slice(0, 3);
-
-    recent.forEach(r => {
-        const date = new Date(r.starttime).toLocaleDateString();
-        const time = new Date(r.starttime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        
-        const li = document.createElement('li');
-        
-        // --- IMPROVED LOGIC: Treating '-' as Admin ---
-        let reservedBy = "Admin"; 
-
-        // 1. Check Student ID
-        if (r.student_id && r.student_id !== "" && r.student_id !== "null" && r.student_id !== "-") {
-            reservedBy = `Student: ${r.student_id}`;
-        } 
-        // 2. Check Teacher ID (specifically filtering out the dash)
-        else if (r.teacher_id_str && 
-                 r.teacher_id_str !== 0 && 
-                 r.teacher_id_str !== "0" && 
-                 r.teacher_id_str !== "null" && 
-                 r.teacher_id_str !== "-") { 
-            reservedBy = `Teacher: ${r.teacher_id_str}`;
-        }
-
-        const room = r.classroom_name || `Room ${r.classroom_id}`;
-        
-        li.style.padding = "8px 0";
-        li.innerHTML = `<strong>${room}</strong> reserved by <strong>${reservedBy}</strong> <br> 
-                        <small style="color: #555;">${date} at ${time}</small>`;
-        
-        listContainer.appendChild(li);
-            });
+    // 2. Calendar Init
+    const calendarEl = document.getElementById('calendar');
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        events: '/reserve-events', 
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek'
         }
     });
-    </script>
+    calendar.render();
+
+    // 3. Fetch Data
+    fetch('/reservations')
+        .then(res => res.json())
+        .then(data => {
+            updateStats(data);
+            updateRecentList(data);
+        })
+        .catch(err => {
+            console.error('Data Error:', err);
+            document.getElementById('recent-list').innerHTML = '<li>Error loading data.</li>';
+        });
+
+    function updateStats(reservations) {
+        const now = new Date();
+        document.getElementById('stat-total').innerText = reservations.length;
+        const activeCount = reservations.filter(r => new Date(r.endtime) > now).length;
+        document.getElementById('stat-active').innerText = activeCount;
+    }
+
+    function updateRecentList(reservations) {
+        const listContainer = document.getElementById('recent-list');
+        listContainer.innerHTML = ''; 
+
+        if (!reservations || reservations.length === 0) {
+            listContainer.innerHTML = '<li>No reservations found.</li>';
+            return;
+        }
+
+        const recent = [...reservations]
+            .sort((a, b) => new Date(b.starttime) - new Date(a.starttime))
+            .slice(0, 3);
+
+        recent.forEach(r => {
+            const date = new Date(r.starttime).toLocaleDateString();
+            const time = new Date(r.starttime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            let reservedBy = "Admin"; 
+            if (r.student_id && !["", "null", "-"].includes(r.student_id)) {
+                reservedBy = `Student: ${r.student_id}`;
+            } else if (r.teacher_id_str && !["0", 0, "null", "-"].includes(r.teacher_id_str)) {
+                reservedBy = `Teacher: ${r.teacher_id_str}`;
+            }
+
+            const room = r.classroom_name || `Room ${r.classroom_id}`;
+            const li = document.createElement('li');
+            li.innerHTML = `<strong>${room}</strong> reserved by <strong>${reservedBy}</strong> <br> 
+                            <small style="color: #666;">${date} at ${time}</small>`;
+            listContainer.appendChild(li);
+        });
+    }
+});
+</script>
+
 </body>
 </html>
