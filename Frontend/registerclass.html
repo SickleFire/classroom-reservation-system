@@ -4,25 +4,28 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Schedule Class Session</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&display=swap" rel="stylesheet">
 <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
         min-height: 100vh;
-        font-family: 'Montserrat', sans-serif;
+        font-family: "Oswald", sans-serif;
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        color: #F8F5F0;
+        color: #fcfcfc;
         position: relative;
         padding: 20px;
-        background: url("teacher.jpg") center / cover no-repeat;
+        background: url("notees.jpg") center / cover no-repeat;
     }
     body::before {
         content: "";
         position: absolute;
         inset: 0;
-        background: rgba(30, 30, 30, 0.85);
+        background: rgba(38, 37, 37, 0.399);
         z-index: 0;
     }
     body > * { position: relative; z-index: 1; }
@@ -40,40 +43,78 @@
         cursor: pointer;
         font-weight: bold;
     }
+     .bckbtn:hover{
+        background: #7d7e85
+     }
 
-    .container {
-        width: 100%;
-        max-width: 500px;
-        padding: 30px;
-        background: rgba(245, 242, 237, 0.15);
-        border-radius: 12px;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-        backdrop-filter: blur(12px);
-        border: 1px solid rgba(255,255,255,0.1);
-    }
+   .container {
+    width: 100%;
+    max-width: 500px;
+    padding: 30px;
+
     
-    h2 { text-align: center; margin-bottom: 20px; color: #F45B26; }
+    background: rgba(0, 0, 0, 0.12);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+
+    border-radius: 16px;
+
+
+    border: 1px solid rgba(255, 255, 255, 0.25);
+
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+}
+.container::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    background: linear-gradient(120deg, #ffffff33, transparent);
+    pointer-events: none;
+}
+    
+    h2 { text-align: center; margin-bottom: 20px; color: #ffffff; }
 
     label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9rem; }
     
-    input, select {
-        width: 100%;
-        padding: 12px;
-        margin-bottom: 15px;
-        border: none;
-        border-radius: 6px;
-        font-size: 15px;
-        background: white;
-    }
+ 
+input, select {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.2);
+    color: #fff;
+    transition: background 0.3s, border 0.3s;
+}
+
+
+select:focus, input:focus {
+    background: rgba(255, 255, 255, 0.3);
+    border: 1px solid #ffffffaa;
+    outline: none;
+    color: #000000;
+}
+
+
+select option {
+    background: #ffffff;
+    color: #000000;
+}
+
+input::placeholder {
+    color: rgba(0, 0, 0, 0.7);
+}
 
     .weekly-container {
-        display: flex;
-        align-items: center;
-        background: rgba(255,255,255,0.1);
-        padding: 10px;
-        border-radius: 6px;
-        margin-bottom: 20px;
-    }
+    display: flex;
+    align-items: center;
+
+    background: rgba(255,255,255,0.1);
+    padding: 10px;
+    border-radius: 8px;
+}
     .weekly-container input { width: auto; margin-bottom: 0; margin-right: 10px; cursor: pointer; }
 
     .btn-group { display: flex; gap: 10px; }
@@ -83,22 +124,25 @@
         padding: 12px;
         border: none;
         border-radius: 6px;
-        background-color: #F45B26; /* Coordinator Orange */
+        background-color: #0d2b64; 
         color: white;
         font-weight: bold;
         cursor: pointer;
         transition: 0.3s;
     }
-    button.submit-btn:hover { background-color: #d44a1e; }
+    button.submit-btn:hover { background-color: #5257dc; }
 
     button.clear-btn {
         flex: 1;
         padding: 12px;
-        background: #666;
+        background: #000000;
         color: white;
         border: none;
         border-radius: 6px;
         cursor: pointer;
+    }
+    button.clear-btn:hover {
+       background-color: #736e6e;
     }
 
     #roomDetails, #summary { 
@@ -108,7 +152,7 @@
         margin-bottom: 15px; 
         font-size: 0.85rem;
         display: none;
-        border-left: 4px solid #F45B26;
+        border-left: 4px solid #1f2d7c;
     }
 
     .hint { font-size: 0.75rem; color: #bbb; margin-top: -10px; margin-bottom: 15px; }
