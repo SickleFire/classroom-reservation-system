@@ -32,7 +32,7 @@ function requireLogin(req, res, next) {
 }
 
 //FIXME Add Require Login
-app.get('/dashboard.html',  (req, res) => {
+app.get('/dashboard.html',  async (req, res) => {
     res.sendFile('dashboard.html', {
         root: path.resolve(__dirname, '..', 'Frontend')
     }, (err) => {
