@@ -141,9 +141,12 @@ async fn main() -> std::io::Result<()> {
     // Load environment variables
     let host = env::var("DB_HOST").unwrap_or_else(|_| "localhost".to_string());
     let user = env::var("DB_USER").unwrap_or_else(|_| "root".to_string());
-    let password = env::var("DB_PASSWORD").unwrap_or_else(|_| "".to_string());
+    let mut password = env::var("DB_PASSWORD").unwrap_or_else(|_| "".to_string());
     let db_name = env::var("DB_NAME").unwrap_or_else(|_| "classroom_reservations".to_string());
 
+    if password == "Miskamhipolito#25" {
+        password = "Miskamhipolito%2325".to_string();
+    }
     // Build the connection string dynamically
     let database_url = format!("mysql://{}:{}@{}:3306/{}", user, password, host, db_name);
     println!("{}", database_url);
