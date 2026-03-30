@@ -22,9 +22,9 @@
     .btn-back { padding: 0.5rem 1rem; background: #333; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9rem; }
     .btn-back:hover { background: #000; }
     
-    .action-btn { padding: 4px 8px; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem; margin-right: 5px; }
-    .btn-cancel { background: #dc3545; color: white; }
-    .btn-approve { background: #28a745; color: white; }
+    .action-btn { padding: 4px 8px; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem; margin-right: 5px; transition: opacity 0.2s; }
+    .btn-delete { background: #333; color: white; }
+    .btn-delete:disabled { opacity: 0.5; cursor: not-allowed; }
   </style>
 </head>
 <body>
@@ -53,105 +53,95 @@
     </tbody>
   </table>
 
-  <p id="message" style="text-align: center; margin-top: 15px; color: #666;"></p>
-
   <script>
     let allSchedules = [];
     let currentUser = null;
 
-    // 1. Get Session Info
     async function checkSession() {
       try {
         const res = await fetch('/session/me');
         if (!res.ok) throw new Error('Not logged in');
         currentUser = await res.json();
         
-        // Update title based on role
         if (currentUser.role === 'admin' || currentUser.role === 'coordinator') {
             document.getElementById('table-title').innerText = "Management: Class Schedules";
         }
-        
         loadSchedules();
       } catch (err) {
         window.location.href = 'index.html';
       }
     }
 
-    // 2. Load Data from Backend (via Rust service/MySQL)
     async function loadSchedules() {
       try {
-        const res = await fetch('/reservations'); // Updated to your new route
+        const res = await fetch('/reservations');
         allSchedules = await res.json();
         renderTable();
       } catch (err) {
-        document.getElementById('message').textContent = 'Error: Could not connect to schedule service.';
+        alert('Could not load schedules');
       }
     }
 
-    // 3. Display the Table
     function renderTable() {
       const tbody = document.getElementById('scheduleTableBody');
-      if (allSchedules.length === 0) {
+      if (!allSchedules || allSchedules.length === 0) {
         tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">No scheduled classes found.</td></tr>';
         return;
       }
 
       tbody.innerHTML = '';
       allSchedules.forEach(item => {
-        // Map data from your SQL implementation table structure
         const id = item.implementationID || item.implementation_id;
-        const course = item.course_name || `Course #${item.courseID}`;
-        const room = item.classroom_name || `Room #${item.classroomID}`;
+        if (!id) return;
+
         const teacher = item.teacher_fname ? `${item.teacher_fname} ${item.teacher_lname}` : 'Unassigned';
         const isWeekly = item.is_weekly ? '<span class="badge-weekly">Weekly</span>' : 'One-time';
-        const status = item.status || 'Scheduled';
-        
-        const statusClass = status === 'Scheduled' ? 'status-scheduled' : 'status-cancelled';
+        const statusClass = item.status === 'Scheduled' ? 'status-scheduled' : 'status-cancelled';
 
         let row = `
-          <tr>
+          <tr id="row-${id}">
             <td>${id}</td>
-            <td><strong>${course}</strong></td>
+            <td><strong>${item.course_name || 'N/A'}</strong></td>
             <td>${isWeekly}</td>
             <td>${new Date(item.starttime).toLocaleString()}</td>
             <td>${new Date(item.endtime).toLocaleString()}</td>
             <td>${teacher}</td>
-            <td>${room}</td>
-            <td class="${statusClass}">${status}</td>
+            <td>${item.classroom_name || 'N/A'}</td>
+            <td class="${statusClass}">${item.status || 'Scheduled'}</td>
             <td>
+              <button id="del-btn-${id}" class="action-btn btn-delete" onclick="deleteReservation(${id})">Delete</button>
+            </td>
+          </tr>
         `;
-
-        // Only Admin or Coordinator can modify schedules
-        if (currentUser.role === 'admin' || currentUser.role === 'coordinator') {
-          row += `
-            <button class="action-btn btn-approve" onclick="updateStatus(${id}, 'Scheduled')">Restore</button>
-            <button class="action-btn btn-cancel" onclick="updateStatus(${id}, 'Cancelled')">Cancel</button>
-          `;
-        } else {
-          row += `<span style="color:#999">View Only</span>`;
-        }
-
-        row += `</td></tr>`;
         tbody.innerHTML += row;
       });
     }
 
-    // 4. Update Status (Cancel/Restore)
-    async function updateStatus(id, newStatus) {
-      try {
-        const res = await fetch(`/reservations/${id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status: newStatus })
-        });
+    async function deleteReservation(id) {
+      // 1. CONFIRM PROMPT (Warning)
+      if (!confirm(`Are you sure you want to delete Reservation #${id}?`)) return;
       
+      const btn = document.getElementById(`del-btn-${id}`);
+      btn.disabled = true;
+      btn.innerText = '...';
+
+      try {
+        const res = await fetch(`/reservations/${id}`, { method: 'DELETE' });
+        const result = await res.json();
+        
         if (res.ok) {
-          loadSchedules(); // Refresh table
+          // 2. ALERT PROMPT (Success)
+          alert(`Successfully Deleted: Reservation #${id}`);
+          loadSchedules(); 
         } else {
-          alert('Failed to update schedule.');
+          alert(result.message || 'Failed to delete reservation.');
+          btn.disabled = false;
+          btn.innerText = 'Delete';
         }
       } catch (err) {
-        console.error('Update error:', err);
+        alert('Server error during delete.');
+        btn.disabled = false;
+        btn.innerText = 'Delete';
       }
     }
 
