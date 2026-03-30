@@ -146,6 +146,7 @@ async fn main() -> std::io::Result<()> {
 
     // Build the connection string dynamically
     let database_url = format!("mysql://{}:{}@{}:3306/{}", user, password, host, db_name);
+    println!("{}", database_url);
 
     let opts = Opts::from_url(&database_url)
         .expect("Invalid database URL");
