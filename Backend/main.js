@@ -134,15 +134,15 @@ app.get('/schedule/available-rooms', requireLogin, async (req, res) => {
         const [rooms] = await pool.query(`
             SELECT classroomID, name, category 
             FROM classrooms 
-            WHERE is_available = 1 
-            AND classroomID NOT IN (
+            WHERE classroomID NOT IN (
                 SELECT classroomID FROM implementations 
-                WHERE status IN ('Pending', 'Approved') 
-                AND NOT (endtime <= ? OR starttime >= ?)
+                WHERE NOT (endtime <= ? OR starttime >= ?)
             )
         `, [starttime, endtime]);
+        
         res.json(rooms);
     } catch (err) {
+        console.error("SQL Error:", err.message);
         res.status(500).json({ message: 'Error checking room availability.' });
     }
 });
