@@ -1,7 +1,9 @@
 use actix_web::{App, HttpResponse, HttpServer, Responder, post, get, web};
 use serde::{Deserialize, Serialize};
-use mysql_async::{Pool};
+use mysql_async::{Pool, Opts};
 use mysql_async::prelude::*;
+use std::env;
+use dotenv::dotenv;
 #[derive(Deserialize)]
 struct ConflictRequest {
     room: i32,
@@ -135,7 +137,21 @@ async fn get_reservations_list(
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    let pool = Pool::new("mysql://root:lumecraft@localhost:3306/classroom_reservations");
+    dotenv().ok();
+    // Load environment variables
+    let host = env::var("DB_HOST").unwrap_or_else(|_| "localhost".to_string());
+    let user = env::var("DB_USER").unwrap_or_else(|_| "root".to_string());
+    let password = env::var("DB_PASSWORD").unwrap_or_else(|_| "".to_string());
+    let db_name = env::var("DB_NAME").unwrap_or_else(|_| "classroom_reservations".to_string());
+
+    // Build the connection string dynamically
+    let database_url = format!("mysql://{}:{}@{}:3306/{}", user, password, host, db_name);
+
+    let opts = Opts::from_url(&database_url)
+        .expect("Invalid database URL");
+
+    let pool = Pool::new(opts);
+
 
 
     HttpServer::new(move || {
