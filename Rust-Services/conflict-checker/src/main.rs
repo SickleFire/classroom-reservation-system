@@ -18,7 +18,7 @@ struct Reservation {
     is_onlineclass: bool,
     starttime: String,
     endtime: String,
-    teacher_id: i32,
+    teacher_id_opt: Option<i32>,
     classroom_id: i32,
     classroom_name: String,
 }
@@ -97,13 +97,13 @@ async fn get_reservations_list(
             is_onlineclass_raw,
             starttime,
             endtime,
-            teacher_id,
+            teacher_id_opt,
             classroom_id,
             classroom_name,
-        ): (i32, i32, String, i32, String, String, i32, i32, String)| {
+        ): (i32, i32, String, i32, String, String, Option<i32>, i32, String)| {
             eprintln!(
                     "Mapping row -> impl_id: {}, course_id: {}, course_name: {}, is_onlineclass_raw: {}, start: {}, end: {}, teacher_id: {:?}, classroom_id: {}",
-                    implementation_id, course_id, course_name, is_onlineclass_raw, starttime, endtime, teacher_id, classroom_id,
+                    implementation_id, course_id, course_name, is_onlineclass_raw, starttime, endtime, teacher_id_opt, classroom_id,
                 );
             Reservation {
                 implementation_id,
@@ -112,7 +112,7 @@ async fn get_reservations_list(
                 is_onlineclass: is_onlineclass_raw != 0, // convert tinyint to bool
                 starttime,
                 endtime,
-                teacher_id,
+                teacher_id_opt,
                 classroom_id,
                 classroom_name
             }
