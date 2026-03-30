@@ -236,11 +236,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const date = new Date(r.starttime).toLocaleDateString();
             const time = new Date(r.starttime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             
-            let reservedBy = "Admin"; 
-            if (r.student_id && !["", "null", "-"].includes(r.student_id)) {
-                reservedBy = `Student: ${r.student_id}`;
-            } else if (r.teacher_id_str && !["0", 0, "null", "-"].includes(r.teacher_id_str)) {
-                reservedBy = `Teacher: ${r.teacher_id_str}`;
+            let reservedBy = "Coordinator"; 
+            if (r.fullname) {
+            reservedBy = r.fullname;
             }
 
             const room = r.classroom_name || `Room ${r.classroom_id}`;

@@ -1,163 +1,130 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Schedule Class Session</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&display=swap" rel="stylesheet">
-<style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-        min-height: 100vh;
-        font-family: "Oswald", sans-serif;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        color: #fcfcfc;
-        position: relative;
-        padding: 20px;
-        background: url("notees.jpg") center / cover no-repeat;
-    }
-    body::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background: rgba(38, 37, 37, 0.399);
-        z-index: 0;
-    }
-    body > * { position: relative; z-index: 1; }
-    
-    .bckbtn {
-        align-self: flex-start;
-        width: 100px;
-        padding: 10px 16px;
-        margin-bottom: 20px;
-        border: none;
-        border-radius: 6px;
-        font-size: 14px;
-        background-color: #333;
-        color: #FFFFFF;
-        cursor: pointer;
-        font-weight: bold;
-    }
-     .bckbtn:hover{
-        background: #7d7e85
-     }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedule Class Session</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            min-height: 100vh;
+            font-family: "Oswald", sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #fcfcfc;
+            position: relative;
+            padding: 20px;
+            background: url("notees.jpg") center / cover no-repeat;
+        }
+        body::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5); 
+            z-index: 0;
+        }
+        body > * { position: relative; z-index: 1; }
+        
+        .bckbtn {
+            align-self: flex-start;
+            width: 100px;
+            padding: 10px 16px;
+            margin-bottom: 20px;
+            border: none;
+            border-radius: 6px;
+            background-color: #333;
+            color: #FFFFFF;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .bckbtn:hover { background: #555; }
 
-   .container {
-    width: 100%;
-    max-width: 500px;
-    padding: 30px;
+        .container {
+            width: 100%;
+            max-width: 500px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        h2 { text-align: center; margin-bottom: 20px; letter-spacing: 1px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9rem; color: #eee; }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.3);
+            background: rgba(0,0,0,0.2);
+            color: #fff;
+            font-family: inherit;
+        }
 
-    
-    background: rgba(0, 0, 0, 0.12);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
+        input:focus, select:focus {
+            background: #fff;
+            color: #000;
+            outline: none;
+        }
 
-    border-radius: 16px;
+        option { color: #000; background: #fff; }
 
+        .weekly-container {
+            display: flex;
+            align-items: center;
+            background: rgba(255,255,255,0.1);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        .weekly-container input { width: auto; margin: 0 10px 0 0; cursor: pointer; }
 
-    border: 1px solid rgba(255, 255, 255, 0.25);
+        .btn-group { display: flex; gap: 10px; margin-top: 10px; }
 
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
-}
-.container::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: 16px;
-    background: linear-gradient(120deg, #ffffff33, transparent);
-    pointer-events: none;
-}
-    
-    h2 { text-align: center; margin-bottom: 20px; color: #ffffff; }
+        button.submit-btn {
+            flex: 2;
+            padding: 14px;
+            border: none;
+            border-radius: 6px;
+            background-color: #2343A2; 
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        button.submit-btn:hover { background-color: #3b82f6; }
 
-    label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9rem; }
-    
- 
-input, select {
-    width: 100%;
-    padding: 12px;
-    margin-bottom: 15px;
-    border-radius: 8px;
-    border: 1px solid rgba(255,255,255,0.2);
-    background: rgba(255,255,255,0.2);
-    color: #fff;
-    transition: background 0.3s, border 0.3s;
-}
+        button.clear-btn {
+            flex: 1;
+            padding: 14px;
+            background: #444;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
 
+        #roomDetails, #summary { 
+            background: rgba(0,0,0,0.4); 
+            padding: 15px; 
+            border-radius: 8px; 
+            margin-bottom: 15px; 
+            font-size: 0.9rem;
+            display: none;
+            border-left: 4px solid #3b82f6;
+        }
 
-select:focus, input:focus {
-    background: rgba(255, 255, 255, 0.3);
-    border: 1px solid #ffffffaa;
-    outline: none;
-    color: #000000;
-}
-
-
-select option {
-    background: #ffffff;
-    color: #000000;
-}
-
-input::placeholder {
-    color: rgba(0, 0, 0, 0.7);
-}
-
-    .weekly-container {
-    display: flex;
-    align-items: center;
-
-    background: rgba(255,255,255,0.1);
-    padding: 10px;
-    border-radius: 8px;
-}
-    .weekly-container input { width: auto; margin-bottom: 0; margin-right: 10px; cursor: pointer; }
-
-    .btn-group { display: flex; gap: 10px; }
-
-    button.submit-btn {
-        flex: 2;
-        padding: 12px;
-        border: none;
-        border-radius: 6px;
-        background-color: #0d2b64; 
-        color: white;
-        font-weight: bold;
-        cursor: pointer;
-        transition: 0.3s;
-    }
-    button.submit-btn:hover { background-color: #5257dc; }
-
-    button.clear-btn {
-        flex: 1;
-        padding: 12px;
-        background: #000000;
-        color: white;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-    }
-    button.clear-btn:hover {
-       background-color: #736e6e;
-    }
-
-    #roomDetails, #summary { 
-        background: rgba(0,0,0,0.3); 
-        padding: 15px; 
-        border-radius: 8px; 
-        margin-bottom: 15px; 
-        font-size: 0.85rem;
-        display: none;
-        border-left: 4px solid #1f2d7c;
-    }
-
-    .hint { font-size: 0.75rem; color: #bbb; margin-top: -10px; margin-bottom: 15px; }
-    #message { text-align: center; margin-top: 15px; font-weight: bold; }
-</style>
+        #message { text-align: center; margin-top: 15px; font-weight: bold; }
+    </style>
 </head>
 <body>
 
@@ -166,18 +133,18 @@ input::placeholder {
     <div class="container">
         <h2>Schedule Class</h2>
 
-        <label>Course To Schedule:</label>
+        <label>Course:</label>
         <select id="courseID" required>
             <option value="">-- Select Course --</option>
         </select>
 
         <label>Date:</label>
-        <input type="date" id="date" required />
+        <input type="date" id="date" onchange="loadRooms()" required />
 
         <div style="display:flex; gap:10px;">
             <div style="flex:1;">
                 <label>Start Time:</label>
-                <select id="starttime" onchange="updateEndTimes()" required>
+                <select id="starttime" onchange="updateEndTimes(); loadRooms();" required>
                     <option value="">-- Start --</option>
                 </select>
             </div>
@@ -190,13 +157,13 @@ input::placeholder {
         </div>
 
         <div class="weekly-container">
-            <input type="checkbox" id="isWeekly">
-            <label for="isWeekly" style="margin-bottom:0;">Repeat Weekly (Full Semester)</label>
+            <input type="checkbox" id="isWeekly" onchange="showRoomDetails()">
+            <label for="isWeekly" style="margin-bottom:0;">Repeat Weekly</label>
         </div>
 
         <label>Available Room:</label>
         <select id="classroomID" onchange="showRoomDetails()" required>
-            <option value="">-- Pick time first --</option>
+            <option value="">-- Select Date & Time first --</option>
         </select>
 
         <div id="roomDetails">
@@ -205,13 +172,13 @@ input::placeholder {
         </div>
 
         <div id="summary">
-            <strong>Schedule Summary:</strong><br>
+            <strong>Summary:</strong><br>
             <span id="summaryText"></span>
         </div>
 
         <div class="btn-group">
             <button class="submit-btn" onclick="submitClass()">Submit Schedule</button>
-            <button class="clear-btn" onclick="resetForm()">Clear</button>
+            <button class="clear-btn" onclick="location.reload()">Clear</button>
         </div>
 
         <p id="message"></p>
@@ -221,7 +188,6 @@ input::placeholder {
     let availableRooms = [];
     let sessionUser = null;
 
-    // Time Slot Generator
     const allSlots = [];
     for (let hour = 7; hour <= 21; hour++) {
         [0, 30].forEach(min => allSlots.push({ hour, min }));
@@ -230,7 +196,8 @@ input::placeholder {
     function toAMPM(hour, min) {
         const period = hour >= 12 ? 'PM' : 'AM';
         const h = hour % 12 === 0 ? 12 : hour % 12;
-        return `${String(h).padStart(2,'0')}:${String(min).padStart(2,'0')} ${period}`;
+        const mm = String(min).padStart(2, '0');
+        return `${h}:${mm} ${period}`;
     }
 
     async function init() {
@@ -247,10 +214,9 @@ input::placeholder {
     function generateStartTimes() {
         const startSelect = document.getElementById('starttime');
         allSlots.forEach(slot => {
-            const hh = String(slot.hour).padStart(2, '0');
-            const mm = String(slot.min).padStart(2, '0');
+            const val = `${String(slot.hour).padStart(2, '0')}:${String(slot.min).padStart(2, '0')}`;
             const opt = document.createElement('option');
-            opt.value = `${hh}:${mm}`;
+            opt.value = val;
             opt.textContent = toAMPM(slot.hour, slot.min);
             opt.dataset.totalMins = (slot.hour * 60) + slot.min;
             startSelect.appendChild(opt);
@@ -263,17 +229,16 @@ input::placeholder {
         const selected = startSelect.selectedOptions[0];
         
         endSelect.innerHTML = '<option value="">-- End --</option>';
-        if (!selected.value) return;
+        if (!selected || !selected.value) return;
 
         const startMins = parseInt(selected.dataset.totalMins);
         
         allSlots.forEach(slot => {
             const slotMins = (slot.hour * 60) + slot.min;
-            if (slotMins > startMins && slotMins <= startMins + 240) { // Max 4 hour blocks
-                const hh = String(slot.hour).padStart(2, '0');
-                const mm = String(slot.min).padStart(2, '0');
+            if (slotMins > startMins && slotMins <= startMins + 300) { 
+                const val = `${String(slot.hour).padStart(2, '0')}:${String(slot.min).padStart(2, '0')}`;
                 const opt = document.createElement('option');
-                opt.value = `${hh}:${mm}`;
+                opt.value = val;
                 opt.textContent = toAMPM(slot.hour, slot.min);
                 endSelect.appendChild(opt);
             }
@@ -281,54 +246,89 @@ input::placeholder {
     }
 
     async function loadCourses() {
-        const res = await fetch('/schedule/courses');
-        const courses = await res.json();
-        const dropdown = document.getElementById('courseID');
-        courses.forEach(c => {
-            const opt = document.createElement('option');
-            opt.value = c.courseID;
-            opt.textContent = `${c.name} (${c.courseID})`;
-            dropdown.appendChild(opt);
-        });
-    }
+    const res = await fetch('/schedule/courses');
+    const courses = await res.json();
+    const dropdown = document.getElementById('courseID');
+    
+    dropdown.innerHTML = '<option value="">-- Select Course --</option>';
+    
+    courses.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.courseID;
+        opt.textContent = `${c.name} - ${c.description}`; 
+        dropdown.appendChild(opt);
+    });
+}
 
     async function loadRooms() {
-        const date = document.getElementById('date').value;
-        const start = document.getElementById('starttime').value;
-        const end = document.getElementById('endtime').value;
-        if (!date || !start || !end) return;
+    const date = document.getElementById('date').value;
+    const start = document.getElementById('starttime').value;
+    const end = document.getElementById('endtime').value;
+    
+    // 1. Only run if all fields are filled
+    if (!date || !start || !end) return;
 
-        const startFull = `${date} ${start}:00`;
-        const endFull = `${date} ${end}:00`;
+    const dropdown = document.getElementById('classroomID');
+    dropdown.innerHTML = '<option value="">Checking availability...</option>';
 
-        const res = await fetch(`/schedule/available-rooms?starttime=${startFull}&endtime=${endFull}`);
+    // 2. Construct the strings exactly as the backend expects
+    const startFull = `${date} ${start}:00`;
+    const endFull = `${date} ${end}:00`;
+
+    try {
+        // 3. FIX: Use encodeURIComponent to handle the space between date and time
+        const url = `/schedule/available-rooms?starttime=${encodeURIComponent(startFull)}&endtime=${encodeURIComponent(endFull)}`;
+        
+        const res = await fetch(url);
+        
+        if (!res.ok) throw new Error('Server returned an error');
+        
         availableRooms = await res.json();
-        const dropdown = document.getElementById('classroomID');
+        
         dropdown.innerHTML = '<option value="">-- Select Room --</option>';
+        
+        if (availableRooms.length === 0) {
+            dropdown.innerHTML = '<option value="">No rooms available for this time</option>';
+            return;
+        }
+
         availableRooms.forEach(r => {
             const opt = document.createElement('option');
             opt.value = r.classroomID;
             opt.textContent = `${r.name} - ${r.category}`;
             dropdown.appendChild(opt);
         });
+    } catch (err) {
+        console.error('Fetch error:', err);
+        dropdown.innerHTML = '<option value="">Error loading rooms</option>';
     }
+}
 
     function showRoomDetails() {
-        const rid = document.getElementById('classroomID').value;
-        const room = availableRooms.find(r => r.classroomID == rid);
-        if (!room) return;
-
-        document.getElementById('roomDetails').style.display = 'block';
-        document.getElementById('roomName').textContent = `Room: ${room.name}`;
-        document.getElementById('roomCategory').textContent = `Type: ${room.category}`;
-
-        document.getElementById('summary').style.display = 'block';
-        document.getElementById('summaryText').innerHTML = `
-            Coordinator: ${sessionUser.fullname}<br>
-            Weekly Repeat: ${document.getElementById('isWeekly').checked ? 'YES' : 'NO'}<br>
-            Course ID: ${document.getElementById('courseID').value}
-        `;
+    const rid = document.getElementById('classroomID').value;
+    const courseSelect = document.getElementById('courseID');
+    const selectedCourseText = courseSelect.options[courseSelect.selectedIndex].text;
+    
+    const room = availableRooms.find(r => r.classroomID == rid);
+    
+    if (!room || !courseSelect.value) {
+        document.getElementById('roomDetails').style.display = 'none';
+        document.getElementById('summary').style.display = 'none';
+        return;
     }
+
+    document.getElementById('roomDetails').style.display = 'block';
+    document.getElementById('roomName').textContent = `Room: ${room.name}`;
+    document.getElementById('roomCategory').textContent = `Type: ${room.category}`;
+
+    document.getElementById('summary').style.display = 'block';
+    document.getElementById('summaryText').innerHTML = `
+        <strong>Coordinator:</strong> ${sessionUser.fullname}<br>
+        <strong>Course:</strong> ${selectedCourseText}<br>
+        <strong>Schedule:</strong> ${document.getElementById('date').value} (${document.getElementById('starttime').value} - ${document.getElementById('endtime').value})<br>
+        <strong>Repeat:</strong> ${document.getElementById('isWeekly').checked ? 'Every Week' : 'One-time Session'}
+    `;
+}
 
     async function submitClass() {
         const date = document.getElementById('date').value;
@@ -341,25 +341,25 @@ input::placeholder {
         };
 
         if (!data.courseID || !data.classroomID || !date) {
-            alert('Please fill all fields');
+            alert('Please complete all selections.');
             return;
         }
 
         try {
-            const res = await fetch('/reserve', { // Updated to matching backend route
+            const res = await fetch('/reserve', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             });
             const result = await res.json();
-            document.getElementById('message').textContent = result.message;
+            const msgEl = document.getElementById('message');
+            msgEl.textContent = result.message;
+            msgEl.style.color = res.ok ? '#28a745' : '#dc3545';
             if (res.ok) setTimeout(() => location.reload(), 2000);
         } catch (err) {
-            document.getElementById('message').textContent = 'Submission error.';
+            document.getElementById('message').textContent = 'Server error.';
         }
     }
-
-    function resetForm() { location.reload(); }
 
     window.onload = init;
 </script>
