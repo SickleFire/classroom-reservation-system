@@ -16,7 +16,7 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            color: #fcfcfc;
+            color: #ffffff;
             position: relative;
             padding: 20px;
             background: url("notees.jpg") center / cover no-repeat;
@@ -25,7 +25,7 @@
             content: "";
             position: absolute;
             inset: 0;
-            background: rgba(0, 0, 0, 0.5); 
+            background: #3a393920; 
             z-index: 0;
         }
         body > * { position: relative; z-index: 1; }
@@ -37,7 +37,7 @@
             margin-bottom: 20px;
             border: none;
             border-radius: 6px;
-            background-color: #333;
+            background-color: #000000;
             color: #FFFFFF;
             cursor: pointer;
             font-weight: bold;
@@ -49,11 +49,11 @@
             width: 100%;
             max-width: 500px;
             padding: 30px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(15px);
+            background:     #18326abf;
+            backdrop-filter: blur(30px);
             border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid #0000009c;
+            box-shadow: 0 8px 32px rgb(0, 0, 0);
         }
         
         h2 { text-align: center; margin-bottom: 20px; letter-spacing: 1px; }
@@ -78,6 +78,27 @@
 
         option { color: #000; background: #fff; }
 
+        #courseID{
+          background-color: #eeeeee;
+          color: #000000;
+        }
+        #date{
+         background-color: #eee;
+         color: #000000;
+        }
+        #starttime{
+         background-color: #eee;
+         color: #000000;
+        }
+        #endtime{
+           background-color: #eee; 
+           color: #000000;
+        }
+        #classroomID{
+         background-color: #eee;
+         color: #000000;
+        }
+
         .weekly-container {
             display: flex;
             align-items: center;
@@ -88,39 +109,52 @@
         }
         .weekly-container input { width: auto; margin: 0 10px 0 0; cursor: pointer; }
 
-        .btn-group { display: flex; gap: 10px; margin-top: 10px; }
+        .btn-group { 
+            display: flex; 
+            gap: 10px;
+            margin-top: 10px; }
+            
 
         button.submit-btn {
             flex: 2;
             padding: 14px;
             border: none;
             border-radius: 6px;
-            background-color: #2343A2; 
-            color: white;
+            background-color: #000000; 
+            color: #ffffff;
             font-weight: bold;
             cursor: pointer;
             transition: 0.3s;
         }
-        button.submit-btn:hover { background-color: #3b82f6; }
+        button.submit-btn:hover { background-color: #747575; 
+        color:#ffffff}
 
         button.clear-btn {
             flex: 1;
             padding: 14px;
-            background: #444;
-            color: white;
+            background: #000000;
+            color: rgb(255, 255, 255);
             border: none;
             border-radius: 6px;
             cursor: pointer;
         }
 
+           button.clear-btn:hover {
+            
+            padding: 14px;
+            background: #565555;
+            color: #ffffff;
+            
+        }
+
         #roomDetails, #summary { 
-            background: rgba(0,0,0,0.4); 
+            background: rgba(0, 0, 0, 0.753); 
             padding: 15px; 
             border-radius: 8px; 
             margin-bottom: 15px; 
             font-size: 0.9rem;
             display: none;
-            border-left: 4px solid #3b82f6;
+            border-left: 4px solid #0d0c71;
         }
 
         #message { text-align: center; margin-top: 15px; font-weight: bold; }
