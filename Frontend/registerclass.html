@@ -8,156 +8,199 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            min-height: 100vh;
-            font-family: "Oswald", sans-serif;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            color: #ffffff;
-            position: relative;
-            padding: 20px;
-            background: url("notees.jpg") center / cover no-repeat;
-        }
-        body::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: #3a393920; 
-            z-index: 0;
-        }
-        body > * { position: relative; z-index: 1; }
-        
-        .bckbtn {
-            align-self: flex-start;
-            width: 100px;
-            padding: 10px 16px;
-            margin-bottom: 20px;
-            border: none;
-            border-radius: 6px;
-            background-color: #000000;
-            color: #FFFFFF;
-            cursor: pointer;
-            font-weight: bold;
-            transition: 0.3s;
-        }
-        .bckbtn:hover { background: #555; }
+       * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        .container {
-            width: 100%;
-            max-width: 500px;
-            padding: 30px;
-            background:     #18326abf;
-            backdrop-filter: blur(30px);
-            border-radius: 16px;
-            border: 1px solid #0000009c;
-            box-shadow: 0 8px 32px rgb(0, 0, 0);
-        }
-        
-        h2 { text-align: center; margin-bottom: 20px; letter-spacing: 1px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9rem; color: #eee; }
-        
-        input, select {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 15px;
-            border-radius: 8px;
-            border: 1px solid rgba(255,255,255,0.3);
-            background: rgba(0,0,0,0.2);
-            color: #fff;
-            font-family: inherit;
-        }
+body {
+    min-height: 100vh;
+    font-family: "Oswald", sans-serif;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #FFFFFF;
+    position: relative;
+    padding: 20px;
+    background: url("papel.jpg") center / cover no-repeat;
+}
 
-        input:focus, select:focus {
-            background: #fff;
-            color: #000;
-            outline: none;
-        }
 
-        option { color: #000; background: #fff; }
+body::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: #14162373; 
+    z-index: 0;
+}
 
-        #courseID{
-          background-color: #eeeeee;
-          color: #000000;
-        }
-        #date{
-         background-color: #eee;
-         color: #000000;
-        }
-        #starttime{
-         background-color: #eee;
-         color: #000000;
-        }
-        #endtime{
-           background-color: #eee; 
-           color: #000000;
-        }
-        #classroomID{
-         background-color: #eee;
-         color: #000000;
-        }
+body > * {
+    position: relative;
+    z-index: 1;
+}
+#courseID,
+#date,
+#starttime,
+#endtime,
+#classroomID {
+    background-color: #EEEEEE;
+    color: #000000;
+}
 
-        .weekly-container {
-            display: flex;
-            align-items: center;
-            background: rgba(255,255,255,0.1);
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-        }
-        .weekly-container input { width: auto; margin: 0 10px 0 0; cursor: pointer; }
 
-        .btn-group { 
-            display: flex; 
-            gap: 10px;
-            margin-top: 10px; }
-            
+.bckbtn {
+    align-self: flex-start;
+    width: 100px;
+    padding: 10px 16px;
+    margin-bottom: 20px;
+    border: none;
+    border-radius: 6px;
+    background-color: #030303;
+    color: #FFFFFF;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.3s;
+    
+}
+.bckbtn:hover {
+      background: #374151;
+  transform: translateY(-1px);
+}
 
-        button.submit-btn {
-            flex: 2;
-            padding: 14px;
-            border: none;
-            border-radius: 6px;
-            background-color: #000000; 
-            color: #ffffff;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        button.submit-btn:hover { background-color: #747575; 
-        color:#ffffff}
+.container {
+    width: 100%;
+    max-width: 500px;
+    padding: 30px;
 
-        button.clear-btn {
-            flex: 1;
-            padding: 14px;
-            background: #000000;
-            color: rgb(255, 255, 255);
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-        }
+    background: #1E3A8ACC; 
+    backdrop-filter: blur(20px);
 
-           button.clear-btn:hover {
-            
-            padding: 14px;
-            background: #565555;
-            color: #ffffff;
-            
-        }
+    border-radius: 16px;
+    border: 1px solid #FFFFFF1A;
 
-        #roomDetails, #summary { 
-            background: rgba(0, 0, 0, 0.753); 
-            padding: 15px; 
-            border-radius: 8px; 
-            margin-bottom: 15px; 
-            font-size: 0.9rem;
-            display: none;
-            border-left: 4px solid #0d0c71;
-        }
+    box-shadow: 0 10px 30px #00000066;
+}
 
-        #message { text-align: center; margin-top: 15px; font-weight: bold; }
+
+h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    letter-spacing: 1px;
+    
+  color: #ffffff;
+  font-size: 2rem;
+  letter-spacing: 0.5px;
+  text-shadow: 0 3px 10px rgba(0,0,0,0.4);
+}
+
+
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    color: #E5E7EB;
+}
+
+
+input, select {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+
+    border: 1px solid #93C5FD;
+    background: #0F172A;
+    color: #FFFFFF;
+
+    font-family: inherit;
+}
+
+
+input:focus, select:focus {
+    border-color: #60A5FA;
+    background: #020617;
+    outline: none;
+}
+
+
+option {
+    background: #FFFFFF;
+    color: #000000;
+}
+
+
+.weekly-container {
+    display: flex;
+    align-items: center;
+    background: #0F172A;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+.weekly-container input {
+    width: auto;
+    margin-right: 10px;
+}
+
+
+.btn-group {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+
+button.submit-btn {
+    flex: 2;
+    padding: 14px;
+    border: none;
+    border-radius: 6px;
+    background-color: #3B82F6;
+    color: #FFFFFF;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+button.submit-btn:hover {
+    background-color: #60A5FA;
+    transform: translateY(-1px);
+}
+
+
+button.clear-btn {
+    flex: 1;
+    padding: 14px;
+    background: #000000;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+
+    transition: all 0.2s ease;
+}
+
+button.clear-btn:hover {
+    background: #374151;
+    transform: translateY(-2px);
+}
+
+
+#roomDetails, #summary {
+    background: #020617CC;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+    display: none;
+    border-left: 4px solid #3B82F6;
+}
+
+
+#message {
+    text-align: center;
+    margin-top: 15px;
+    font-weight: bold;
+}
     </style>
 </head>
 <body>
