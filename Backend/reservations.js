@@ -84,15 +84,19 @@ module.exports = function(pool) {
       // FALLBACK: If Rust is down, fetch directly from MySQL so the UI doesn't break
       try {
         const [rows] = await pool.query(`
-          SELECT 
-            i.implementationID, i.courseID, c.name as course_name,
-            i.starttime, i.endtime, i.status, i.is_weekly,
-            cl.name as classroom_name, t.firstname as teacher_fname, t.lastname as teacher_lname
-          FROM implementations i
-          JOIN courses c ON i.courseID = c.courseID
-          JOIN classrooms cl ON i.classroomID = cl.classroomID
-          LEFT JOIN teachers t ON i.teacherID = t.teacherID
-        `);
+  SELECT 
+    i.implementationID,
+    i.teacherID,
+    c.name as course_name,
+    i.starttime, i.endtime, i.status, i.is_weekly,
+    cl.name as classroom_name,
+    t.firstname as teacher_fname,
+    t.lastname  as teacher_lname
+  FROM implementations i
+  JOIN courses c ON i.courseID = c.courseID
+  JOIN classrooms cl ON i.classroomID = cl.classroomID
+  LEFT JOIN teachers t ON i.teacherID = t.teacherID
+`);
         res.json(rows);
       } catch (dbErr) {
         res.status(500).json({ message: 'Both Rust and Database links failed.' });

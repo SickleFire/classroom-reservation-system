@@ -31,6 +31,9 @@ app.use(express.json());
 const reservationsRoutes = require('./reservations.js')(pool);
 app.use(reservationsRoutes);
 
+const teachersRoutes = require('./teachers.js')(pool);
+app.use(teachersRoutes);
+
 function requireLogin(req, res, next) {
     if (!req.session || !req.session.user) {
         return res.redirect('/index.html');

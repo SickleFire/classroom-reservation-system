@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Teachers</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            min-height: 100vh;
+            font-family: "Oswald", sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #FFFFFF;
+            position: relative;
+            padding: 20px;
+            background: url("papel.jpg") center / cover no-repeat;
+        }
+
+        body::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: #14162373;
+            z-index: 0;
+        }
+
+        body > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ── Back Button ── */
+        .bckbtn {
+            align-self: flex-start;
+            width: 100px;
+            padding: 10px 16px;
+            margin-bottom: 20px;
+            border: none;
+            border-radius: 6px;
+            background-color: #030303;
+            color: #FFFFFF;
+            cursor: pointer;
+            font-family: "Oswald", sans-serif;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .bckbtn:hover {
+            background: #374151;
+            transform: translateY(-1px);
+        }
+
+        /* ── Page Title ── */
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-shadow: 0 3px 10px rgba(0,0,0,0.4);
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        /* ── Layout ── */
+        .layout {
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        /* ── Form Card ── */
+        .form-card {
+            flex: 1;
+            min-width: 280px;
+            padding: 28px;
+            background: #1E3A8ACC;
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            border: 1px solid #FFFFFF1A;
+            box-shadow: 0 10px 30px #00000066;
+            height: fit-content;
+        }
+
+        .form-card h2 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            color: #ffffff;
+            border-bottom: 1px solid #FFFFFF22;
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            color: #E5E7EB;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border: 1px solid #93C5FD;
+            background: #0F172A;
+            color: #FFFFFF;
+            font-family: "Oswald", sans-serif;
+            font-size: 1rem;
+        }
+
+        input[type="text"]:focus {
+            border-color: #60A5FA;
+            background: #020617;
+            outline: none;
+        }
+
+        input[type="text"]::placeholder {
+            color: #64748B;
+        }
+
+        /* Teacher ID Preview Badge */
+        .id-preview {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #020617CC;
+            padding: 12px 15px;
+            border-radius: 8px;
+            border-left: 4px solid #3B82F6;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            color: #93C5FD;
+        }
+        .id-preview span {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #60A5FA;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 5px;
+        }
+
+        button.submit-btn {
+            flex: 2;
+            padding: 14px;
+            border: none;
+            border-radius: 6px;
+            background-color: #3B82F6;
+            color: #FFFFFF;
+            font-family: "Oswald", sans-serif;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        button.submit-btn:hover {
+            background-color: #60A5FA;
+            transform: translateY(-1px);
+        }
+        button.submit-btn:disabled {
+            background-color: #374151;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        button.clear-btn {
+            flex: 1;
+            padding: 14px;
+            background: #000000;
+            color: #FFFFFF;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: "Oswald", sans-serif;
+            transition: all 0.2s ease;
+        }
+        button.clear-btn:hover {
+            background: #374151;
+            transform: translateY(-2px);
+        }
+
+        #message {
+            text-align: center;
+            margin-top: 14px;
+            font-weight: bold;
+            font-size: 0.95rem;
+            min-height: 20px;
+        }
+
+        /* ── Teacher List Card ── */
+        .list-card {
+            flex: 1.4;
+            min-width: 320px;
+            padding: 28px;
+            background: #1E3A8ACC;
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            border: 1px solid #FFFFFF1A;
+            box-shadow: 0 10px 30px #00000066;
+        }
+
+        .list-card h2 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            color: #ffffff;
+            border-bottom: 1px solid #FFFFFF22;
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .teacher-count {
+            background: #3B82F6;
+            color: #fff;
+            border-radius: 20px;
+            padding: 2px 12px;
+            font-size: 0.85rem;
+        }
+
+        /* Search bar */
+        .search-bar {
+            width: 100%;
+            padding: 10px 12px;
+            margin-bottom: 14px;
+            border-radius: 8px;
+            border: 1px solid #334155;
+            background: #0F172A;
+            color: #FFFFFF;
+            font-family: "Oswald", sans-serif;
+            font-size: 0.95rem;
+        }
+        .search-bar:focus { outline: none; border-color: #60A5FA; }
+        .search-bar::placeholder { color: #64748B; }
+
+        /* Table */
+        .teacher-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .teacher-table thead tr {
+            background: #0F172ACC;
+            color: #93C5FD;
+            text-align: left;
+        }
+
+        .teacher-table th {
+            padding: 10px 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #1E40AF;
+        }
+
+        .teacher-table tbody tr {
+            border-bottom: 1px solid #FFFFFF11;
+            transition: background 0.2s;
+        }
+
+        .teacher-table tbody tr:hover {
+            background: #FFFFFF08;
+        }
+
+        .teacher-table td {
+            padding: 10px 12px;
+            color: #E5E7EB;
+        }
+
+        .id-badge {
+            display: inline-block;
+            background: #1E40AF;
+            color: #93C5FD;
+            border-radius: 4px;
+            padding: 2px 8px;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .delete-btn {
+            background: transparent;
+            border: 1px solid #EF4444;
+            color: #EF4444;
+            border-radius: 5px;
+            padding: 4px 12px;
+            cursor: pointer;
+            font-family: "Oswald", sans-serif;
+            font-size: 0.8rem;
+            transition: 0.2s;
+        }
+        .delete-btn:hover {
+            background: #EF4444;
+            color: #fff;
+        }
+
+        .no-teachers {
+            text-align: center;
+            padding: 30px;
+            color: #64748B;
+            font-size: 0.95rem;
+        }
+
+        /* Loading spinner */
+        .spinner {
+            text-align: center;
+            padding: 20px;
+            color: #60A5FA;
+        }
+
+        /* Confirm dialog overlay */
+        .confirm-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+        .confirm-overlay.show { display: flex; }
+        .confirm-box {
+            background: #1E3A8A;
+            border: 1px solid #3B82F6;
+            border-radius: 14px;
+            padding: 30px;
+            max-width: 360px;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+        .confirm-box h3 { margin-bottom: 10px; font-size: 1.3rem; }
+        .confirm-box p { color: #93C5FD; margin-bottom: 20px; font-size: 0.95rem; }
+        .confirm-btns { display: flex; gap: 10px; justify-content: center; }
+        .confirm-yes {
+            padding: 10px 24px; background: #EF4444; border: none;
+            border-radius: 6px; color: #fff; cursor: pointer;
+            font-family: "Oswald", sans-serif; font-size: 1rem; transition: 0.2s;
+        }
+        .confirm-yes:hover { background: #DC2626; }
+        .confirm-no {
+            padding: 10px 24px; background: #374151; border: none;
+            border-radius: 6px; color: #fff; cursor: pointer;
+            font-family: "Oswald", sans-serif; font-size: 1rem; transition: 0.2s;
+        }
+        .confirm-no:hover { background: #4B5563; }
+
+        footer {
+            margin-top: 2rem;
+            text-align: center;
+            color: rgba(255,255,255,0.5);
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+
+    <button class="bckbtn" onclick="window.location.href='dashboard.html'">← Back</button>
+    <div class="page-title">👨‍🏫 Manage Teachers</div>
+
+    <div class="layout">
+
+        <!-- ── ADD TEACHER FORM ── -->
+        <div class="form-card">
+            <h2>Add New Teacher</h2>
+
+            <div class="id-preview">
+                🪪 Next Teacher ID: <span id="next-id">Loading...</span>
+            </div>
+
+            <label>First Name:</label>
+            <input type="text" id="firstname" placeholder="e.g. Juan" autocomplete="off" />
+
+            <label>Last Name:</label>
+            <input type="text" id="lastname" placeholder="e.g. dela Cruz" autocomplete="off" />
+
+            <div class="btn-group">
+                <button class="submit-btn" id="submit-btn" onclick="addTeacher()">Add Teacher</button>
+                <button class="clear-btn" onclick="clearForm()">Clear</button>
+            </div>
+
+            <p id="message"></p>
+        </div>
+
+        <!-- ── TEACHER LIST ── -->
+        <div class="list-card">
+            <h2>
+                Teacher List
+                <span class="teacher-count" id="teacher-count">0</span>
+            </h2>
+
+            <input type="text" class="search-bar" id="search-input"
+                placeholder="🔍 Search by name or ID..."
+                oninput="filterTeachers()" />
+
+            <div id="table-container">
+                <div class="spinner">Loading teachers...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── DELETE CONFIRM DIALOG ── -->
+    <div class="confirm-overlay" id="confirm-overlay">
+        <div class="confirm-box">
+            <h3>Delete Teacher?</h3>
+            <p id="confirm-text">This teacher will be permanently removed.</p>
+            <div class="confirm-btns">
+                <button class="confirm-yes" onclick="confirmDelete()">Yes, Delete</button>
+                <button class="confirm-no" onclick="closeConfirm()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <footer><p>&copy; 2026 Coordinator Classroom Reservation System</p></footer>
+
+<script>
+    let allTeachers = [];
+    let pendingDeleteId = null;
+
+    // ── INIT ──────────────────────────────────────────────────────────────────
+    async function init() {
+        try {
+            const res = await fetch('/session/me');
+            if (!res.ok) throw new Error();
+        } catch { window.location.href = 'index.html'; return; }
+
+        loadTeachers();
+        fetchNextId();
+    }
+
+    // ── FETCH NEXT AUTO-INCREMENT ID ─────────────────────────────────────────
+    async function fetchNextId() {
+        try {
+            const res = await fetch('/admin/teachers/next-id');
+            const data = await res.json();
+            document.getElementById('next-id').textContent = `#${data.nextId}`;
+        } catch {
+            document.getElementById('next-id').textContent = 'Auto';
+        }
+    }
+
+    // ── LOAD ALL TEACHERS ────────────────────────────────────────────────────
+    async function loadTeachers() {
+        try {
+            const res = await fetch('/admin/teachers');
+            allTeachers = await res.json();
+            renderTable(allTeachers);
+            document.getElementById('teacher-count').textContent = allTeachers.length;
+        } catch {
+            document.getElementById('table-container').innerHTML =
+                '<p class="no-teachers">⚠️ Failed to load teachers.</p>';
+        }
+    }
+
+    // ── RENDER TABLE ─────────────────────────────────────────────────────────
+    function renderTable(teachers) {
+        const container = document.getElementById('table-container');
+
+        if (!teachers || teachers.length === 0) {
+            container.innerHTML = '<p class="no-teachers">No teachers found. Add one!</p>';
+            return;
+        }
+
+        let html = `
+            <table class="teacher-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        teachers.forEach(t => {
+            html += `
+                <tr>
+                    <td><span class="id-badge">#${t.teacherID}</span></td>
+                    <td>${escHtml(t.firstname)}</td>
+                    <td>${escHtml(t.lastname)}</td>
+                    <td>
+                        <button class="delete-btn" onclick="promptDelete(${t.teacherID}, '${escHtml(t.firstname)} ${escHtml(t.lastname)}')">
+                            Delete
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+
+        html += `</tbody></table>`;
+        container.innerHTML = html;
+    }
+
+    // ── SEARCH FILTER ────────────────────────────────────────────────────────
+    function filterTeachers() {
+        const q = document.getElementById('search-input').value.toLowerCase();
+        const filtered = allTeachers.filter(t =>
+            t.firstname.toLowerCase().includes(q) ||
+            t.lastname.toLowerCase().includes(q) ||
+            String(t.teacherID).includes(q)
+        );
+        renderTable(filtered);
+    }
+
+    // ── ADD TEACHER ──────────────────────────────────────────────────────────
+    async function addTeacher() {
+        const firstname = document.getElementById('firstname').value.trim();
+        const lastname  = document.getElementById('lastname').value.trim();
+        const msgEl     = document.getElementById('message');
+        const btn       = document.getElementById('submit-btn');
+
+        if (!firstname || !lastname) {
+            msgEl.textContent = '⚠️ Please fill in both fields.';
+            msgEl.style.color = '#FBBF24';
+            return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = 'Saving...';
+
+        try {
+            const res = await fetch('/admin/teachers', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ firstname, lastname })
+            });
+            const result = await res.json();
+
+            if (res.ok) {
+                msgEl.textContent = `✅ ${result.message}`;
+                msgEl.style.color = '#28a745';
+                clearForm();
+                loadTeachers();
+                fetchNextId();
+            } else {
+                msgEl.textContent = `❌ ${result.message}`;
+                msgEl.style.color = '#dc3545';
+            }
+        } catch {
+            msgEl.textContent = '❌ Server error. Try again.';
+            msgEl.style.color = '#dc3545';
+        }
+
+        btn.disabled = false;
+        btn.textContent = 'Add Teacher';
+    }
+
+    // ── CLEAR FORM ────────────────────────────────────────────────────────────
+    function clearForm() {
+        document.getElementById('firstname').value = '';
+        document.getElementById('lastname').value = '';
+        document.getElementById('message').textContent = '';
+    }
+
+    // ── DELETE FLOW ───────────────────────────────────────────────────────────
+    function promptDelete(id, name) {
+        pendingDeleteId = id;
+        document.getElementById('confirm-text').textContent =
+            `Remove "${name}" (ID #${id})? This cannot be undone.`;
+        document.getElementById('confirm-overlay').classList.add('show');
+    }
+
+    function closeConfirm() {
+        pendingDeleteId = null;
+        document.getElementById('confirm-overlay').classList.remove('show');
+    }
+
+    async function confirmDelete() {
+        if (!pendingDeleteId) return;
+        closeConfirm();
+        try {
+            const res = await fetch(`/admin/teachers/${pendingDeleteId}`, { method: 'DELETE' });
+            const result = await res.json();
+            if (res.ok) {
+                loadTeachers();
+                fetchNextId();
+            } else {
+                alert(result.message || 'Failed to delete teacher.');
+            }
+        } catch {
+            alert('Server error while deleting.');
+        }
+    }
+
+    // ── UTILS ─────────────────────────────────────────────────────────────────
+    function escHtml(str) {
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
+    window.onload = init;
+</script>
+</body>
+</html>
