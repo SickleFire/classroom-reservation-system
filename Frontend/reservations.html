@@ -78,16 +78,6 @@ td {
 tr:nth-child(even) td { background: #f6f7f9; }
 tr:hover td { background: #eef2f7; }
 
-.status-scheduled {
-  color: #22c55e;
-  font-weight: 600;
-}
-
-.status-cancelled {
-  color: #ef4444;
-  font-weight: 600;
-}
-
 .badge-weekly {
   background: #2563eb;
   color: #fff;
@@ -96,18 +86,15 @@ tr:hover td { background: #eef2f7; }
   font-size: 0.72rem;
 }
 
-/* Teacher cell */
 .teacher-cell {
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
-
 .teacher-name {
   font-weight: 600;
   color: #111827;
 }
-
 .teacher-id {
   font-size: 0.72rem;
   color: #6b7280;
@@ -117,7 +104,6 @@ tr:hover td { background: #eef2f7; }
   display: inline-block;
   width: fit-content;
 }
-
 .unassigned {
   color: #9ca3af;
   font-style: italic;
@@ -135,7 +121,6 @@ tr:hover td { background: #eef2f7; }
   font-family: "Oswald", sans-serif;
   transition: 0.2s ease;
 }
-
 .btn-back:hover {
   background: #374151;
   transform: translateY(-1px);
@@ -148,15 +133,12 @@ tr:hover td { background: #eef2f7; }
   cursor: pointer;
   font-size: 0.78rem;
   font-family: "Oswald", sans-serif;
-  margin-right: 5px;
   transition: 0.2s ease;
 }
-
 .btn-cancel {
   background: #ef4444;
   color: white;
 }
-
 .btn-cancel:hover {
   background: #903131;
   transform: translateY(-1px);
@@ -167,7 +149,7 @@ tr:hover td { background: #eef2f7; }
 <body>
 
 <div class="top-bar">
-  <h2 id="table-title">Class Schedule List</h2>
+  <h2>Class Schedule List</h2>
   <button class="btn-back" onclick="window.location.href='dashboard.html'">← Back to Dashboard</button>
 </div>
 
@@ -181,34 +163,40 @@ tr:hover td { background: #eef2f7; }
       <th>End Time</th>
       <th>Teacher</th>
       <th>Classroom</th>
-      <th>Status</th>
       <th>Actions</th>
     </tr>
   </thead>
-
   <tbody id="scheduleTableBody">
-    <tr><td colspan="9">Loading schedule data...</td></tr>
+    <tr><td colspan="8">Loading schedule data...</td></tr>
   </tbody>
 </table>
 
 <script>
 let allSchedules = [];
-let currentUser = null;
+let teacherMap = {};  // teacherID → { firstname, lastname }
 
 async function checkSession() {
   try {
     const res = await fetch('/session/me');
     if (!res.ok) throw new Error('Not logged in');
-
-    currentUser = await res.json();
-
-    if (currentUser.role === 'admin' || currentUser.role === 'coordinator') {
-      document.getElementById('table-title').innerText = "Management: Class Schedules";
-    }
-
+    await res.json();
+    await loadTeacherMap();  // load teachers first so names are ready
     loadSchedules();
   } catch (err) {
     window.location.href = 'index.html';
+  }
+}
+
+// Fetch all teachers and build an ID → name lookup
+async function loadTeacherMap() {
+  try {
+    const res = await fetch('/admin/teachers');
+    const teachers = await res.json();
+    teachers.forEach(t => {
+      teacherMap[t.teacherID] = { firstname: t.firstname, lastname: t.lastname };
+    });
+  } catch (err) {
+    console.error('Could not load teacher map:', err);
   }
 }
 
@@ -226,59 +214,55 @@ function renderTable() {
   const tbody = document.getElementById('scheduleTableBody');
 
   if (!allSchedules || allSchedules.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;">No scheduled classes found.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;">No scheduled classes found.</td></tr>`;
     return;
   }
 
   tbody.innerHTML = '';
 
   allSchedules.forEach(item => {
-    const id = item.implementationID || item.implementation_id;
-    if (!id) return;
-
-    // ── Teacher column: show name + ID badge, or Unassigned
-    let teacherCell;
-    if (item.teacher_fname && item.teacher_lname) {
-      const tid = item.teacherID || item.teacher_id || '';
-      teacherCell = `
-        <div class="teacher-cell">
-          <span class="teacher-name">${item.teacher_fname} ${item.teacher_lname}</span>
-          ${tid ? `<span class="teacher-id">ID #${tid}</span>` : ''}
-        </div>`;
-    } else {
-      teacherCell = `<span class="unassigned">Unassigned</span>`;
-    }
+    const id            = item.implementation_id;
+    const courseName    = item.course_name    || 'N/A';
+    const classroomName = item.classroom_name || 'N/A';
 
     const isWeekly = item.is_weekly
       ? `<span class="badge-weekly">Weekly</span>`
       : 'One-time';
 
-    const status = (item.status || 'Scheduled').toLowerCase();
-    const statusClass = (status === 'scheduled' || status === 'approved')
-      ? 'status-scheduled'
-      : 'status-cancelled';
+    // Rust returns teacher_id_opt (null if unassigned)
+    const tid = item.teacher_id_opt;
+    let teacherCell;
+    if (tid && teacherMap[tid]) {
+      const t = teacherMap[tid];
+      teacherCell = `
+        <div class="teacher-cell">
+          <span class="teacher-name">${t.firstname} ${t.lastname}</span>
+          <span class="teacher-id">ID #${tid}</span>
+        </div>`;
+    } else if (tid) {
+      // Has an ID but somehow not in the map
+      teacherCell = `<span class="teacher-id">ID #${tid}</span>`;
+    } else {
+      teacherCell = `<span class="unassigned">Unassigned</span>`;
+    }
 
-    const row = `
+    tbody.innerHTML += `
       <tr>
         <td>${id}</td>
-        <td><strong>${item.course_name || 'N/A'}</strong></td>
+        <td><strong>${courseName}</strong></td>
         <td>${isWeekly}</td>
         <td>${new Date(item.starttime).toLocaleString()}</td>
         <td>${new Date(item.endtime).toLocaleString()}</td>
         <td>${teacherCell}</td>
-        <td>${item.classroom_name || 'N/A'}</td>
-        <td class="${statusClass}">${item.status || 'Scheduled'}</td>
+        <td>${classroomName}</td>
         <td>
-          <button id="del-btn-${id}"
-            class="action-btn btn-cancel"
+          <button id="del-btn-${id}" class="action-btn btn-cancel"
             onclick="deleteReservation(${id})">
             Delete
           </button>
         </td>
       </tr>
     `;
-
-    tbody.innerHTML += row;
   });
 }
 

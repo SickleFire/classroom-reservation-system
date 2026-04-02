@@ -120,5 +120,30 @@ module.exports = function(pool) {
     }
   });
 
+  // ─── DELETE: REMOVE RESERVATION ──────────────────────────────────────────
+  router.delete('/reservations/:id', async (req, res) => {
+  const { id } = req.params;
+
+  if (isNaN(id)) {
+    return res.status(400).json({ message: 'Invalid reservation ID.' });
+  }
+
+  try {
+    const [result] = await pool.query(
+      'DELETE FROM implementations WHERE implementationID = ?',
+      [id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Reservation not found.' });
+    }
+
+    res.json({ message: `Reservation #${id} deleted successfully.` });
+    } catch (err) {
+    console.error('Delete reservation error:', err);
+    res.status(500).json({ message: 'Failed to delete reservation.' });
+    }
+  });
+
   return router;
 };

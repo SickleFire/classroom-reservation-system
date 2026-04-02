@@ -63,32 +63,31 @@ router.get('/admin/teachers/next-id', requireLogin, async (req, res) => {
 
     // ─── DELETE: REMOVE TEACHER ───────────────────────────────────────────────
     router.delete('/admin/teachers/:id', requireLogin, async (req, res) => {
-        const { id } = req.params;
+    const id = parseInt(req.params.id);
+    
+    if (isNaN(id)) {
+        return res.status(400).json({ message: 'Invalid teacher ID.' });
+    }
 
-        if (isNaN(id)) {
-            return res.status(400).json({ message: 'Invalid teacher ID.' });
+    try {
+        await pool.query(
+            'UPDATE implementations SET teacherID = NULL WHERE teacherID = ?',
+            [id]
+        );
+        const [result] = await pool.query(
+            'DELETE FROM teachers WHERE teacherID = ?',
+            [id]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Teacher not found.' });
         }
 
-        try {
-            // Detach teacher from any scheduled classes before deleting
-            await pool.query(
-                'UPDATE implementations SET teacherID = NULL WHERE teacherID = ?',
-                [id]
-            );
-            const [result] = await pool.query(
-                'DELETE FROM teachers WHERE teacherID = ?',
-                [id]
-            );
-
-            if (result.affectedRows === 0) {
-                return res.status(404).json({ message: 'Teacher not found.' });
-            }
-
-            res.json({ message: 'Teacher deleted successfully.' });
-        } catch (err) {
-            console.error('Delete teacher error:', err);
-            res.status(500).json({ message: 'Failed to delete teacher.' });
-        }
+        res.json({ message: 'Teacher deleted successfully.' });
+    } catch (err) {
+        console.error('Delete teacher error:', err.code, err.message);
+        res.status(500).json({ message: `Failed to delete: ${err.message}` });
+    }
     });
 
     // ─── GET: TEACHERS FOR SCHEDULE DROPDOWN ─────────────────────────────────
