@@ -82,7 +82,9 @@ app.post('/login', async (req, res) => {
             fullname:      `${coords[0].firstname} ${coords[0].lastname}`,
             coordinatorID: coords[0].coordinatorID
         };
-
+        console.log('Session after login:', req.session.user);
+console.log('Session ID:', req.sessionID);
+console.log('Cookie settings:', req.session.cookie);
         
         res.json({ message: 'Login successful!', redirect: 'dashboard.html' });
     } catch (err) {
