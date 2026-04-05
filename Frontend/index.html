@@ -161,6 +161,7 @@ async function submitLogin() {
             message.textContent = result.message;
         }
     } catch (err) {
+        console.log(err);
         message.textContent = 'Connection error. Please try again.';
     }
 }
