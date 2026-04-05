@@ -158,7 +158,7 @@ let pool = Pool::new(builder);
             .service(check_conflict) // register route
             .service(get_reservations_list)
     })
-    .bind(("127.0.0.1", 8080))?
+    .bind(("0.0.0.0", 8080))?
     .run()
     .await
 }
