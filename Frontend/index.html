@@ -132,6 +132,18 @@
 </div>
 
 <script>
+    // At the top of your script, before submitLogin
+window.addEventListener('DOMContentLoaded', async () => {
+    try {
+        const res = await fetch('/session/me', { credentials: 'include' });
+        if (res.ok) {
+            // Already logged in — go straight to dashboard
+            window.location.href = 'dashboard.html';
+        }
+    } catch (err) {
+        // Not logged in, stay on login page
+    }
+});
 async function submitLogin() {
     const email    = document.getElementById('email').value;
     const password = document.getElementById('password').value;
