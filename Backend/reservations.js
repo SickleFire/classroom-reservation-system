@@ -3,7 +3,8 @@ const axios = require('axios');
 
 module.exports = function(pool) {
   const router = express.Router();
-  const RUST_URL = process.env.RUST_SERVICE_URL || 'http://127.0.0.1:8080';
+  const RUST_URL = process.env.RUST_SERVICE_URL || 'http://0.0.0.0:8080';
+  console.log('RUST_SERVICE_URL:', process.env.RUST_SERVICE_URL);
 
   // ─── GET: CALENDAR EVENTS ──────────────────────────────────────────────────
   router.get('/reserve-events', async (req, res) => {
