@@ -178,6 +178,10 @@
 </footer>
 
 <script>
+    const res = await fetch('/session/me', { credentials: 'include' });
+if (!res.ok) {  
+    window.location.href = 'index.html';  // frontend handles redirect
+}
     window.addEventListener('DOMContentLoaded', async () => {
     try {
         const res = await fetch('/session/me', { credentials: 'include' });
