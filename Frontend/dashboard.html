@@ -178,27 +178,26 @@
 </footer>
 
 <script>
-document.addEventListener('DOMContentLoaded', async function() {
-
-    // 1. Session check
+    const res = await fetch('/session/me', { credentials: 'include' });
+    if (!res.ok) {  
+        window.location.href = 'index.html';  // frontend handles redirect
+    }
+document.addEventListener('DOMContentLoaded', async() => {
+    
     try {
         const res = await fetch('/session/me', { credentials: 'include' });
         if (!res.ok) {
             window.location.href = 'index.html';
-            return;
         }
-        const user = await res.json();
-        document.getElementById('user-fullname').innerText = user.fullname || 'Coordinator';
     } catch (err) {
         window.location.href = 'index.html';
-        return;
     }
 
-    // 2. Calendar
+    // 2. Calendar Init
     const calendarEl = document.getElementById('calendar');
     const calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: 'dayGridMonth',
-        events: '/reserve-events',
+        events: '/reserve-events', 
         headerToolbar: {
             left: 'prev,next today',
             center: 'title',
@@ -207,16 +206,17 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
     calendar.render();
 
-    // 3. Reservations data
-    try {
-        const res = await fetch('/reservations', { credentials: 'include' });
-        const data = await res.json();
-        updateStats(data);
-        updateRecentList(data);
-    } catch (err) {
-        console.error('Data Error:', err);
-        document.getElementById('recent-list').innerHTML = '<li>Error loading data.</li>';
-    }
+    // 3. Fetch Data
+    fetch('/reservations')
+        .then(res => res.json())
+        .then(data => {
+            updateStats(data);
+            updateRecentList(data);
+        })
+        .catch(err => {
+            console.error('Data Error:', err);
+            document.getElementById('recent-list').innerHTML = '<li>Error loading data.</li>';
+        });
 
     function updateStats(reservations) {
         const now = new Date();
@@ -227,7 +227,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     function updateRecentList(reservations) {
         const listContainer = document.getElementById('recent-list');
-        listContainer.innerHTML = '';
+        listContainer.innerHTML = ''; 
 
         if (!reservations || reservations.length === 0) {
             listContainer.innerHTML = '<li>No reservations found.</li>';
@@ -241,10 +241,15 @@ document.addEventListener('DOMContentLoaded', async function() {
         recent.forEach(r => {
             const date = new Date(r.starttime).toLocaleDateString();
             const time = new Date(r.starttime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            const reservedBy = r.fullname || 'Coordinator';
+            
+            let reservedBy = "Coordinator"; 
+            if (r.fullname) {
+            reservedBy = r.fullname;
+            }
+
             const room = r.classroom_name || `Room ${r.classroom_id}`;
             const li = document.createElement('li');
-            li.innerHTML = `<strong>${room}</strong> reserved by <strong>${reservedBy}</strong><br>
+            li.innerHTML = `<strong>${room}</strong> reserved by <strong>${reservedBy}</strong> <br> 
                             <small style="color: #666;">${date} at ${time}</small>`;
             listContainer.appendChild(li);
         });
