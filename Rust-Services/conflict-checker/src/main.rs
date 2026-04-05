@@ -138,20 +138,25 @@ async fn get_reservations_list(
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     dotenv().ok();
-    let password = env::var("DB_PASSWORD").unwrap_or_default();
+    let db_host = env::var("DB_HOST").expect("DB_HOST not set");
+    let db_port: u16 = env::var("DB_PORT").unwrap_or("3306".to_string())
+        .parse().unwrap_or(3306);
+    let db_user = env::var("DB_USER").expect("DB_USER not set");
+    let db_password = env::var("DB_PASSWORD").unwrap_or_default();
+    let db_name = env::var("DB_NAME").expect("DB_NAME not set");
     let port: u16 = env::var("PORT").unwrap_or("8080".to_string())
         .parse().unwrap_or(8080);
 
 let builder = OptsBuilder::default()
-    .ip_or_hostname("localhost")
-    .tcp_port(3306)
-    .user(Some("root"))
-    .pass(Some(&password))
-    .db_name(Some("classroom_reservations"));
+        .ip_or_hostname(db_host)
+        .tcp_port(db_port)
+        .user(Some(db_user))
+        .pass(Some(db_password))
+        .db_name(Some(db_name));
 
 let pool = Pool::new(builder);
 
-
+println!("Rust service running on port {}", port);
 
 
 
