@@ -223,7 +223,7 @@ app.use((req, res) => {
 });
 
 // Initialize and Listen
-const PORT = 7878;
+const PORT = process.env.PORT || 7878;
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running at http://0.0.0.0:${PORT}`);
 });
