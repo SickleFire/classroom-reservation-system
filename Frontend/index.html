@@ -135,13 +135,16 @@
     // At the top of your script, before submitLogin
 window.addEventListener('DOMContentLoaded', async () => {
     try {
-        const res = await fetch('/session/me', { credentials: 'include' });
+        const res = await fetch('/session/me', { 
+            credentials: 'include',
+            redirect: 'error'  // ← don't follow redirects, treat as error
+        });
         if (res.ok) {
-            // Already logged in — go straight to dashboard
             window.location.href = 'dashboard.html';
         }
     } catch (err) {
-        // Not logged in, stay on login page
+        // Not logged in or redirect error — stay on login page
+        console.log('No active session, staying on login page.');
     }
 });
 async function submitLogin() {
