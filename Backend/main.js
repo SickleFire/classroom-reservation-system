@@ -41,6 +41,9 @@ app.use(express.json());
 const reservationsRoutes = require('./reservations.js')(pool);
 app.use(reservationsRoutes);
 
+const classroomsRouter = require('./classrooms.js')(pool);
+app.use(classroomsRouter);
+
 const teachersRoutes = require('./teachers.js')(pool);
 app.use(teachersRoutes);
 

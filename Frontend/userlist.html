@@ -116,13 +116,14 @@ tr:nth-child(even) {
     background: #DC2626;
 }
 
-
 .message {
     margin-top: 1rem;
     font-weight: bold;
     color: #111827;
 }
-    </style>
+
+footer { margin-top: 2rem; color: rgba(255,255,255,0.5); font-size: 0.85rem; }
+</style>
 </head>
 <body>
 
@@ -148,7 +149,7 @@ tr:nth-child(even) {
     </table>
 
     <p class="message" id="message"></p>
-
+<footer><p>&copy; 2026 Coordinator Classroom Reservation System</p></footer>
     <script>
         async function loadUsers() {
             const tbody = document.getElementById('userTableBody');

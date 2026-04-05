@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Classrooms</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            min-height: 100vh;
+            font-family: "Oswald", sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #FFFFFF;
+            position: relative;
+            padding: 20px;
+            background: url("papel.jpg") center / cover no-repeat;
+        }
+
+        body::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: #14162373;
+            z-index: 0;
+        }
+
+        body > * { position: relative; z-index: 1; }
+
+        /* ── Back Button ── */
+        .bckbtn {
+            align-self: flex-start;
+            width: 100px;
+            padding: 10px 16px;
+            margin-bottom: 20px;
+            border: none;
+            border-radius: 6px;
+            background-color: #030303;
+            color: #FFFFFF;
+            cursor: pointer;
+            font-family: "Oswald", sans-serif;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .bckbtn:hover { background: #374151; transform: translateY(-1px); }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-shadow: 0 3px 10px rgba(0,0,0,0.4);
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        /* ── Layout ── */
+        .layout {
+            width: 100%;
+            max-width: 1050px;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        /* ── Form Card ── */
+        .form-card {
+            flex: 1;
+            min-width: 300px;
+            padding: 28px;
+            background: #1E3A8ACC;
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            border: 1px solid #FFFFFF1A;
+            box-shadow: 0 10px 30px #00000066;
+            height: fit-content;
+        }
+
+        .form-card h2 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            color: #ffffff;
+            border-bottom: 1px solid #FFFFFF22;
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            color: #E5E7EB;
+        }
+
+        input[type="text"],
+        input[type="textarea"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border: 1px solid #93C5FD;
+            background: #0F172A;
+            color: #FFFFFF;
+            font-family: "Oswald", sans-serif;
+            font-size: 1rem;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 72px;
+        }
+
+        select option { background: #0F172A; }
+
+        input[type="text"]:focus,
+        textarea:focus,
+        select:focus {
+            border-color: #60A5FA;
+            background: #020617;
+            outline: none;
+        }
+
+        /* ID Preview */
+        .id-preview {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #020617CC;
+            padding: 12px 15px;
+            border-radius: 8px;
+            border-left: 4px solid #3B82F6;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            color: #93C5FD;
+        }
+        .id-preview span {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #60A5FA;
+        }
+
+        /* Toggle Row */
+        .toggle-row {
+            display: flex;
+            gap: 14px;
+            margin-bottom: 15px;
+        }
+
+        .toggle-item {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #0F172A;
+            border: 1px solid #93C5FD;
+            border-radius: 8px;
+            padding: 10px 14px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .toggle-item:hover { border-color: #60A5FA; }
+
+        .toggle-item label {
+            margin: 0;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        /* Custom Toggle Switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+        .switch input { display: none; }
+        .slider {
+            position: absolute;
+            inset: 0;
+            background: #374151;
+            border-radius: 24px;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+        .slider::before {
+            content: "";
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            background: #fff;
+            border-radius: 50%;
+            top: 3px;
+            left: 3px;
+            transition: 0.3s;
+        }
+        .switch input:checked + .slider { background: #3B82F6; }
+        .switch input:checked + .slider::before { transform: translateX(20px); }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 5px;
+        }
+
+        button.submit-btn {
+            flex: 2;
+            padding: 14px;
+            border: none;
+            border-radius: 6px;
+            background-color: #3B82F6;
+            color: #FFFFFF;
+            font-family: "Oswald", sans-serif;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        button.submit-btn:hover { background-color: #60A5FA; }
+
+        button.submit-btn.editing {
+            background-color: #F59E0B;
+        }
+        button.submit-btn.editing:hover { background-color: #FCD34D; }
+
+        button.clear-btn {
+            flex: 1;
+            padding: 14px;
+            background: #000000;
+            color: #FFFFFF;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: "Oswald", sans-serif;
+            transition: 0.2s;
+        }
+
+        #message {
+            text-align: center;
+            margin-top: 14px;
+            font-weight: bold;
+            font-size: 0.95rem;
+            min-height: 20px;
+        }
+
+        /* Edit mode banner */
+        .edit-banner {
+            display: none;
+            background: #78350F;
+            border: 1px solid #F59E0B;
+            border-radius: 8px;
+            padding: 10px 14px;
+            margin-bottom: 16px;
+            font-size: 0.88rem;
+            color: #FDE68A;
+            align-items: center;
+            gap: 10px;
+        }
+        .edit-banner.show { display: flex; }
+        .edit-banner button {
+            margin-left: auto;
+            background: transparent;
+            border: 1px solid #F59E0B;
+            color: #F59E0B;
+            padding: 3px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: "Oswald";
+            font-size: 0.8rem;
+        }
+
+        /* ── List Card ── */
+        .list-card {
+            flex: 1.5;
+            min-width: 340px;
+            padding: 28px;
+            background: #1E3A8ACC;
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            border: 1px solid #FFFFFF1A;
+            box-shadow: 0 10px 30px #00000066;
+        }
+
+        .list-card h2 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            border-bottom: 1px solid #FFFFFF22;
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .room-count {
+            background: #3B82F6;
+            color: #fff;
+            border-radius: 20px;
+            padding: 2px 12px;
+            font-size: 0.85rem;
+        }
+
+        .search-bar {
+            width: 100%;
+            padding: 10px 12px;
+            margin-bottom: 14px;
+            border-radius: 8px;
+            border: 1px solid #334155;
+            background: #0F172A;
+            color: #FFFFFF;
+            font-family: "Oswald", sans-serif;
+        }
+        .search-bar:focus { outline: none; border-color: #60A5FA; }
+
+        /* Filter row */
+        .filter-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+        }
+        .filter-btn {
+            padding: 5px 14px;
+            border-radius: 20px;
+            border: 1px solid #334155;
+            background: transparent;
+            color: #93C5FD;
+            font-family: "Oswald";
+            font-size: 0.82rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .filter-btn.active, .filter-btn:hover {
+            background: #1E40AF;
+            border-color: #3B82F6;
+            color: #fff;
+        }
+
+        /* Table */
+        .room-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88rem;
+        }
+        .room-table th {
+            padding: 10px 10px;
+            text-align: left;
+            border-bottom: 2px solid #1E40AF;
+            color: #93C5FD;
+            white-space: nowrap;
+        }
+        .room-table td {
+            padding: 10px 10px;
+            border-bottom: 1px solid #FFFFFF11;
+            vertical-align: middle;
+        }
+
+        .id-badge {
+            background: #1E40AF;
+            color: #93C5FD;
+            border-radius: 4px;
+            padding: 2px 8px;
+            font-weight: 700;
+        }
+
+        .cat-badge {
+            border-radius: 4px;
+            padding: 2px 8px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .cat-lecture  { background: #1D4ED8; color: #BFDBFE; }
+        .cat-lab      { background: #065F46; color: #6EE7B7; }
+        .cat-seminar  { background: #6B21A8; color: #E9D5FF; }
+        .cat-studio   { background: #92400E; color: #FDE68A; }
+        .cat-other    { background: #374151; color: #D1D5DB; }
+
+        .status-dot {
+            display: inline-block;
+            width: 9px; height: 9px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        .dot-available   { background: #22C55E; }
+        .dot-unavailable { background: #EF4444; }
+
+        .byod-chip {
+            background: #0E7490;
+            color: #A5F3FC;
+            border-radius: 4px;
+            padding: 2px 7px;
+            font-size: 0.75rem;
+        }
+
+        .action-group { display: flex; gap: 6px; }
+
+        .edit-btn {
+            background: transparent;
+            border: 1px solid #F59E0B;
+            color: #F59E0B;
+            border-radius: 5px;
+            padding: 4px 10px;
+            cursor: pointer;
+            font-family: "Oswald", sans-serif;
+            font-size: 0.82rem;
+            transition: 0.2s;
+        }
+        .edit-btn:hover { background: #F59E0B; color: #000; }
+
+        .delete-btn {
+            background: transparent;
+            border: 1px solid #EF4444;
+            color: #EF4444;
+            border-radius: 5px;
+            padding: 4px 10px;
+            cursor: pointer;
+            font-family: "Oswald", sans-serif;
+            font-size: 0.82rem;
+            transition: 0.2s;
+        }
+        .delete-btn:hover { background: #EF4444; color: #fff; }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 30px 0;
+            color: #64748B;
+        }
+
+        /* ── Confirm Overlay ── */
+        .confirm-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+        .confirm-overlay.show { display: flex; }
+        .confirm-box {
+            background: #1E3A8A;
+            border: 1px solid #3B82F6;
+            border-radius: 14px;
+            padding: 30px;
+            text-align: center;
+            max-width: 340px;
+            width: 90%;
+        }
+        .confirm-btns { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
+        .confirm-yes { padding: 10px 24px; background: #EF4444; border: none; border-radius: 6px; color: #fff; cursor: pointer; font-family: "Oswald"; font-size: 1rem; }
+        .confirm-no  { padding: 10px 24px; background: #374151; border: none; border-radius: 6px; color: #fff; cursor: pointer; font-family: "Oswald"; font-size: 1rem; }
+
+        footer { margin-top: 2rem; color: rgba(255,255,255,0.5); font-size: 0.85rem; }
+    </style>
+</head>
+<body>
+
+    <button class="bckbtn" onclick="window.location.href='dashboard.html'">← Back</button>
+    <div class="page-title">🏫 Manage Classrooms</div>
+
+    <div class="layout">
+
+        <!-- ── FORM CARD ── -->
+        <div class="form-card">
+            <h2 id="form-title">Add New Classroom</h2>
+
+            <div class="id-preview">
+                🪪 Next Room ID: <span id="next-id">Loading...</span>
+            </div>
+
+            <div class="edit-banner" id="edit-banner">
+                ✏️ Editing Room <strong id="edit-label"></strong>
+                <button onclick="cancelEdit()">Cancel</button>
+            </div>
+
+            <label>Room Name:</label>
+            <input type="text" id="room-name" placeholder="e.g. Room 101" autocomplete="off" />
+
+            <label>Description:</label>
+            <textarea id="room-desc" placeholder="e.g. Air-conditioned lecture room, capacity 40"></textarea>
+
+            <label>Category:</label>
+            <select id="room-category">
+                <option value="">— Select Category —</option>
+                <option value="Lecture Room">Lecture Room</option>
+                <option value="Multimedia Room">Multimedia Room</option>
+                <option value="Sound Engineering Room">Sound Engineering Room</option>
+                <option value="Computer Lab">Computer Lab</option>
+            </select>
+
+            <div class="toggle-row">
+                <div class="toggle-item" onclick="toggleSwitch('byod-toggle')">
+                    <label for="byod-toggle">📱 BYOD</label>
+                    <label class="switch">
+                        <input type="checkbox" id="byod-toggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="toggle-item" onclick="toggleSwitch('avail-toggle')">
+                    <label for="avail-toggle">✅ Available</label>
+                    <label class="switch">
+                        <input type="checkbox" id="avail-toggle" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button class="submit-btn" id="submit-btn" onclick="submitRoom()">Add Classroom</button>
+                <button class="clear-btn" onclick="cancelEdit()">Clear</button>
+            </div>
+            <p id="message"></p>
+        </div>
+
+        <!-- ── LIST CARD ── -->
+        <div class="list-card">
+            <h2>
+                Classroom List
+                <span class="room-count" id="room-count">0</span>
+            </h2>
+
+            <input type="text" class="search-bar" id="search-input"
+                   placeholder="🔍 Search by name, category..." oninput="filterRooms()" />
+
+            <div class="filter-row" id="filter-row">
+                <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
+                <button class="filter-btn" onclick="setFilter('Lecture Room', this)">Lecture Room</button>
+                <button class="filter-btn" onclick="setFilter('Multimedia Room', this)">Multimedia Room</button>
+                <button class="filter-btn" onclick="setFilter('Sound Engineering Room', this)">Sound Engineering</button>
+                <button class="filter-btn" onclick="setFilter('Computer Lab', this)">Computer Lab</button>
+            </div>
+
+            <div id="table-container">
+                <div class="empty-state">Loading classrooms...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── CONFIRM DELETE OVERLAY ── -->
+    <div class="confirm-overlay" id="confirm-overlay">
+        <div class="confirm-box">
+            <h3>Delete Classroom?</h3>
+            <p id="confirm-text" style="margin-top:10px; color:#93C5FD; font-size:0.95rem;">
+                This room will be permanently removed.
+            </p>
+            <div class="confirm-btns">
+                <button class="confirm-yes" onclick="confirmDelete()">Yes, Delete</button>
+                <button class="confirm-no" onclick="closeConfirm()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <footer><p>&copy; 2026 Coordinator Classroom Reservation System</p></footer>
+
+<script>
+    let allRooms = [];
+    let pendingDeleteId = null;
+    let editingId = null;
+    let activeFilter = 'all';
+
+    // ─── INIT ────────────────────────────────────────────────────────────────
+    async function init() {
+        try {
+            const res = await fetch('/session/me');
+            if (!res.ok) throw new Error();
+        } catch { window.location.href = 'index.html'; return; }
+        loadRooms();
+        fetchNextId();
+    }
+
+    // ─── PREVENT toggle-item click from double-firing ────────────────────────
+    function toggleSwitch(id) {
+        const el = document.getElementById(id);
+        el.checked = !el.checked;
+    }
+    // Stop label click from also firing the div click
+    document.querySelectorAll('.switch').forEach(sw => {
+        sw.addEventListener('click', e => e.stopPropagation());
+    });
+
+    // ─── FETCH NEXT ID ───────────────────────────────────────────────────────
+    async function fetchNextId() {
+        try {
+            const res = await fetch('/admin/classrooms/next-id');
+            const data = await res.json();
+            document.getElementById('next-id').textContent = `#${data.nextId}`;
+        } catch {
+            document.getElementById('next-id').textContent = 'Auto';
+        }
+    }
+
+    // ─── LOAD ROOMS ──────────────────────────────────────────────────────────
+    async function loadRooms() {
+        try {
+            const res = await fetch('/admin/classrooms');
+            allRooms = await res.json();
+            applyFilters();
+            document.getElementById('room-count').textContent = allRooms.length;
+        } catch {
+            document.getElementById('table-container').innerHTML =
+                '<div class="empty-state">⚠️ Failed to load classrooms.</div>';
+        }
+    }
+
+    // ─── FILTER / SEARCH ─────────────────────────────────────────────────────
+    function setFilter(cat, btn) {
+        activeFilter = cat;
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        applyFilters();
+    }
+
+    function filterRooms() { applyFilters(); }
+
+    function applyFilters() {
+        const q = document.getElementById('search-input').value.toLowerCase();
+        let filtered = allRooms;
+
+        if (activeFilter !== 'all') {
+            filtered = filtered.filter(r => r.category === activeFilter);
+        }
+        if (q) {
+            filtered = filtered.filter(r =>
+                (r.name || '').toLowerCase().includes(q) ||
+                (r.category || '').toLowerCase().includes(q) ||
+                (r.description || '').toLowerCase().includes(q) ||
+                String(r.classroomID).includes(q)
+            );
+        }
+        renderTable(filtered);
+    }
+
+    // ─── RENDER TABLE ────────────────────────────────────────────────────────
+    function renderTable(rooms) {
+        const container = document.getElementById('table-container');
+        if (!rooms || rooms.length === 0) {
+            container.innerHTML = '<div class="empty-state">No classrooms found.</div>';
+            return;
+        }
+
+        const catColors = [
+            'cat-lecture', 'cat-lab', 'cat-seminar', 'cat-studio', 'cat-other'
+        ];
+        function catClass(cat) {
+            let hash = 0;
+            for (let i = 0; i < cat.length; i++) hash = cat.charCodeAt(i) + ((hash << 5) - hash);
+            return catColors[Math.abs(hash) % catColors.length];
+        }
+
+        let html = `<table class="room-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>`;
+
+        rooms.forEach(r => {
+            const id = r.classroomID;
+            const cat = r.category || 'Other';
+            const cc = catClass(cat);
+            const avail = r.is_available ? 1 : 0;
+            const byod = r.BYOD ? 1 : 0;
+
+            html += `<tr>
+                <td><span class="id-badge">#${id}</span></td>
+                <td>
+                    <div style="font-weight:600;">${escHtml(r.name)}</div>
+                    ${r.description ? `<div style="font-size:0.78rem;color:#94A3B8;margin-top:2px;">${escHtml(r.description)}</div>` : ''}
+                    ${byod ? `<span class="byod-chip">BYOD</span>` : ''}
+                </td>
+                <td><span class="cat-badge ${cc}">${escHtml(cat)}</span></td>
+                <td>
+                    <span class="status-dot ${avail ? 'dot-available' : 'dot-unavailable'}"></span>
+                    ${avail ? 'Available' : 'Unavailable'}
+                </td>
+                <td>
+                    <div class="action-group">
+                        <button class="edit-btn" onclick="startEdit(${id})">Edit</button>
+                        <button class="delete-btn" onclick="promptDelete(${id}, '${escHtml(r.name)}')">Delete</button>
+                    </div>
+                </td>
+            </tr>`;
+        });
+
+        html += `</tbody></table>`;
+        container.innerHTML = html;
+    }
+
+    // ─── SUBMIT (ADD or EDIT) ─────────────────────────────────────────────────
+    async function submitRoom() {
+        const name        = document.getElementById('room-name').value.trim();
+        const description = document.getElementById('room-desc').value.trim();
+        const category    = document.getElementById('room-category').value;
+        const BYOD        = document.getElementById('byod-toggle').checked ? 1 : 0;
+        const is_available = document.getElementById('avail-toggle').checked ? 1 : 0;
+
+        if (!name || !category) {
+            showMsg('⚠️ Room name and category are required.', '#F87171');
+            return;
+        }
+
+        const body = { name, description, category, BYOD, is_available };
+
+        try {
+            let res;
+            if (editingId) {
+                res = await fetch(`/admin/classrooms/${editingId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+            } else {
+                res = await fetch('/admin/classrooms', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+            }
+
+            if (res.ok) {
+                showMsg(editingId ? '✅ Classroom updated!' : '✅ Classroom added!', '#4ADE80');
+                cancelEdit();
+                loadRooms();
+                fetchNextId();
+            } else {
+                const err = await res.json();
+                showMsg(err.message || '❌ Failed.', '#F87171');
+            }
+        } catch (e) {
+            showMsg('❌ Network error.', '#F87171');
+        }
+    }
+
+    // ─── EDIT ─────────────────────────────────────────────────────────────────
+    function startEdit(id) {
+        const room = allRooms.find(r => r.classroomID === id);
+        if (!room) return;
+
+        editingId = id;
+
+        document.getElementById('room-name').value     = room.name || '';
+        document.getElementById('room-desc').value     = room.description || '';
+        document.getElementById('room-category').value = room.category || '';
+        document.getElementById('byod-toggle').checked  = !!room.BYOD;
+        document.getElementById('avail-toggle').checked = !!room.is_available;
+
+        document.getElementById('form-title').textContent = 'Edit Classroom';
+        document.getElementById('submit-btn').textContent = 'Save Changes';
+        document.getElementById('submit-btn').classList.add('editing');
+
+        document.getElementById('edit-label').textContent = `#${id} — ${room.name}`;
+        document.getElementById('edit-banner').classList.add('show');
+
+        document.querySelector('.form-card').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function cancelEdit() {
+        editingId = null;
+        document.getElementById('room-name').value     = '';
+        document.getElementById('room-desc').value     = '';
+        document.getElementById('room-category').value = '';
+        document.getElementById('byod-toggle').checked  = false;
+        document.getElementById('avail-toggle').checked = true;
+        document.getElementById('form-title').textContent = 'Add New Classroom';
+        document.getElementById('submit-btn').textContent = 'Add Classroom';
+        document.getElementById('submit-btn').classList.remove('editing');
+        document.getElementById('edit-banner').classList.remove('show');
+        showMsg('', '');
+    }
+
+    // ─── DELETE ──────────────────────────────────────────────────────────────
+    function promptDelete(id, name) {
+        pendingDeleteId = id;
+        document.getElementById('confirm-text').textContent =
+            `Remove "${name}" (ID #${id})? This cannot be undone.`;
+        document.getElementById('confirm-overlay').classList.add('show');
+    }
+
+    function closeConfirm() {
+        pendingDeleteId = null;
+        document.getElementById('confirm-overlay').classList.remove('show');
+    }
+
+    async function confirmDelete() {
+        if (!pendingDeleteId) return;
+        const id = pendingDeleteId;
+        closeConfirm();
+
+        try {
+            const res = await fetch(`/admin/classrooms/${id}`, { method: 'DELETE' });
+            if (res.ok) {
+                loadRooms();
+                fetchNextId();
+            } else {
+                const err = await res.json();
+                alert(err.message || 'Delete failed.');
+            }
+        } catch { alert('Network error.'); }
+    }
+
+    // ─── HELPERS ─────────────────────────────────────────────────────────────
+    function showMsg(text, color) {
+        const el = document.getElementById('message');
+        el.textContent = text;
+        el.style.color = color;
+    }
+
+    function escHtml(str) {
+        return String(str).replace(/[&<>"']/g, m => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        })[m]);
+    }
+
+    window.onload = init;
+</script>
+</body>
+</html>
