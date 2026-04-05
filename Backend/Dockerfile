@@ -9,6 +9,7 @@ RUN npm install --production
 
 # Copy backend source code
 COPY Backend ./Backend
+COPY Frontend ./Frontend
 
 EXPOSE 7878
 CMD ["node", "Backend/main.js"]
