@@ -4,13 +4,8 @@ const bcrypt  = require('bcrypt');
 const mysql   = require('mysql2');
 const path    = require('path');
 require('dotenv').config();
-const cors = require('cors');
 
 const app = express();
-app.use(cors({
-    origin: 'https://classroom-reservation-system-production.up.railway.app',
-    credentials: true  // required for cookies/sessions
-}));
 app.set('trust proxy', 1);
 
 
