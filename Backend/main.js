@@ -6,6 +6,8 @@ const path    = require('path');
 require('dotenv').config();
 
 const app = express();
+app.set('trust proxy', 1);
+
 
 // ─── DATABASE CONNECTION ─────────────────────────────────────────────────────
 const pool = mysql.createPool({
@@ -21,7 +23,12 @@ app.use(session({
     secret:            process.env.SESSION_SECRET || 'classroom_secret_101',
     resave:            false,
     saveUninitialized: false,
-    cookie:            { secure: false }
+    cookie: {
+        secure: true,       // cookie only over HTTPS
+        sameSite: 'none'    // allow cross-site requests
+  }
+
+
 }));
 
 app.use(express.static(path.join(__dirname, '..', 'Frontend')));
@@ -73,10 +80,10 @@ app.post('/login', async (req, res) => {
             coordinatorID: coords[0].coordinatorID
         };
 
-        req.session.save(() => {
-            res.json({ message: 'Login successful!', redirect: 'dashboard.html' });
-        });
+        
+        res.json({ message: 'Login successful!', redirect: 'dashboard.html' });
     } catch (err) {
+        console.log(err);
         res.status(500).json({ message: 'Login failed.' });
     }
 });
