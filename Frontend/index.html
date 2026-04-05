@@ -150,6 +150,13 @@ async function submitLogin() {
             credentials: 'include'
         });
 
+        const contentType = res.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+        message.textContent = 'Server error. Please try again.';
+        console.error('Non-JSON response:', res.status, res.url);
+        return;
+        }
+
         const result = await res.json();
 
         if (res.ok) {
