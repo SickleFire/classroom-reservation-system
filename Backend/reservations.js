@@ -3,6 +3,7 @@ const axios = require('axios');
 
 module.exports = function(pool) {
   const router = express.Router();
+  const RUST_URL = process.env.RUST_SERVICE_URL || 'http://127.0.0.1:8080';
 
   // ─── GET: CALENDAR EVENTS ──────────────────────────────────────────────────
   router.get('/reserve-events', async (req, res) => {
@@ -44,7 +45,7 @@ module.exports = function(pool) {
     try {
       // 1. Call Rust service. 
       // IMPORTANT: We send 'room' as the ID and 'start'/'end' as ISO strings
-      const rustResponse = await axios.post('http://127.0.0.1:8080/check-conflict', { 
+      const rustResponse = await axios.post(`${RUST_URL}/check-conflict`, { 
         room: parseInt(classroomID), 
         start: starttime,
         end: endtime 
@@ -73,7 +74,7 @@ module.exports = function(pool) {
   router.get('/reservations', async (req, res) => {
     try {
       // Calling Rust to get the processed list of schedules
-      const response = await axios.get('http://127.0.0.1:8080/reservations');
+      const response = await axios.get(`${RUST_URL}/reservations`);
       
       // We pass the Rust data directly to the frontend
       // Ensure your Rust service returns an array of objects

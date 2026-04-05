@@ -139,6 +139,8 @@ async fn get_reservations_list(
 async fn main() -> std::io::Result<()> {
     dotenv().ok();
     let password = env::var("DB_PASSWORD").unwrap_or_default();
+    let port: u16 = env::var("PORT").unwrap_or("8080".to_string())
+        .parse().unwrap_or(8080);
 
 let builder = OptsBuilder::default()
     .ip_or_hostname("localhost")
@@ -146,6 +148,7 @@ let builder = OptsBuilder::default()
     .user(Some("root"))
     .pass(Some(&password))
     .db_name(Some("classroom_reservations"));
+
 let pool = Pool::new(builder);
 
 
@@ -158,7 +161,7 @@ let pool = Pool::new(builder);
             .service(check_conflict) // register route
             .service(get_reservations_list)
     })
-    .bind(("0.0.0.0", 8080))?
+    .bind(("0.0.0.0", port))?
     .run()
     .await
 }
